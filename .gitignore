@@ -1,0 +1,28 @@
+# Python Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyInstaller / Build outputs
+build/
+dist/
+*.spec
+
+# Local Downloads
+downloads/
+*.mp4
+*.mp3
+*.m4a
+*.webm
+
+# IDEs & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

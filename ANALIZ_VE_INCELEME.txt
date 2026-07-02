@@ -1,0 +1,90 @@
+================================================================================
+           YOUTUBE DOWNLOADER - DETAYLI KOD VE MANTIK ANALİZİ KONTROL RAPORU
+================================================================================
+Tarih: 02.07.2026
+Proje Konumu: D:\Antigravity\yt_downloader
+
+1. GENEL DEĞERLENDİRME VE TESPİT EDİLEN SORUNLAR
+--------------------------------------------------------------------------------
+
+[A] BACKEND VE YOUTUBE MOTORU (downloader.py)
+--------------------------------------------------------------------------------
+1. Player Client (Engelleme) Sorunu:
+   - extractor_args içinde 'player_client': ['android', 'web', 'ios'] zorlanması
+     bazı YouTube videolarında (örneğin Shorts, yaş kısıtlamalı veya yeni SABR
+     akışı kullanan videolar) 403 Forbidden veya ExtractorError hatasına yol açıyor.
+   - Çözüm: extractor_args zorlamasını kaldırıp yt-dlp'nin akıllı varsayılan
+     istemci seçimini (poToken ve web JS player) kullanmasını sağlamak.
+
+2. Oynatma Listesi (Playlist / Shorts) Ağırlaşması:
+   - Playlist linklerinde (ör. ?list=...) extract_info çağrısı tüm listedeki
+     yüzlerce videonun bilgisini çekmeye çalışıyor ve timeout / bellek hatası veriyor.
+   - Çözüm: fetch_info aşamasında 'extract_flat': 'in_playlist' veya 'noplaylist': True
+     kullanılarak tek video bilgisi çekilmesini sağlamak.
+
+3. Hata Mesajları ve ANSI Renk Kodları:
+   - yt-dlp hatalarında yer alan terminal renk kodları (\x1b[0;31m) temizlense de
+     boş veya yetersiz hata mesajı durumunda kullanıcıya anlaşılır mesaj verilemiyor.
+   - Çözüm: Hata yakalama mekanizmasını güçlendirip anlaşılır Türkçe mesajlar üretmek.
+
+4. MP4 ve Kalite Seçimi (Height Parsing):
+   - '1080p', '720p' gibi dizgiler parçalanırken beklenmeyen kalite girdilerinde
+     fallback mekanizması yetersiz kalabiliyor.
+   - Çözüm: Kalite dizgilerini güvenli bir şekilde sayısal yüksekliğe çevirmek.
+
+5. Mutagen MP3 Kapak Resmi & Tag Gömme:
+   - MP3 dosyasında kapak resmi (APIC) eklenirken WebP formatlı görsellerde MIME
+     türü hataları yaşanabiliyor.
+   - Çözüm: Thumbnail görselini indirip PIL / io ile JPEG dönüştürmesi yaparak
+     ID3 tagına sorunsuz gömmek.
+
+
+[B] PYWEBVIEW VE PYTHON-JS KÖPRÜSÜ (app.py)
+--------------------------------------------------------------------------------
+1. Promise Rejection ve Hata Yakalama:
+   - fetch_info metodu Python tarafında hata verdiğinde PyWebView JS tarafında
+     Promise rejection fırlatıyor. JS catch bloğu genel "Video bilgileri alınamadı"
+     uyarısı gösterdiği için gerçek hatanın ne olduğu ekrana yansımıyordu.
+   - Çözüm: Python API yanıtını her zaman {"success": True, "data": ...} veya
+     {"success": False, "error": "..."} formatında standartlaştırmak.
+
+2. Pano (Clipboard) Okuma Güvenliği:
+   - tkinter.Tk() panodan okuma yaparken bazı Windows sistemlerinde Tcl kilitlenmesine
+     neden olabiliyor.
+   - Çözüm: Pano okuma için güvenli try-except yapısı ve pywebview desteği kullanmak.
+
+
+[C] ARAYÜZ VE KULLANICI DENEYİMİ (index.html)
+--------------------------------------------------------------------------------
+1. Hata Bildirimi (Alert Dialog Sorunu):
+   - Tarayıcının çirkin native alert() pencereleri yerine arayüzün temasına uygun,
+     kırmızı/turuncu renkli şık inline hata bildirim kartları kullanılmalı.
+
+2. Yüklenme Durumu (Spinner & Buton Pasifleştirme):
+   - Bilgi getirilirken veya indirme yapılırken "Dönüştür" ve "İndir" butonları
+     pasifleştirilmeli, çift tıklamalar engellenmeli.
+   - Spinner hizalaması sayfa ortasında tam simetrik tutulmalı.
+
+3. Link Temizleme ve Doğrulama:
+   - Girdideki boşluklar, youtu.be, youtube.com/shorts/, mobile youtube linkleri
+     otomatik olarak temizlenmeli ve doğrulanmalı.
+
+4. İndirme İlerlemesi (Progress Bar & İstatistikler):
+   - İndirme hızı, kalan süre ve yüzde bilgileri yumuşak geçişlerle (smooth transition)
+     güncellenmeli.
+
+
+[D] GEÇMİŞ VE DOSYA İŞLEMLERİ (history_manager.py)
+--------------------------------------------------------------------------------
+1. Windows Explorer Dosya/Klasör Açma:
+   - Dosya yollarında boşluk veya Türkçe karakter olduğunda subprocess çağrısı
+     Windows Explorer'ı doğru parametrelerle açmalıdır.
+   - Çözüm: list biçiminde ['explorer', '/select,', path] çağırmak.
+
+2. Geçmiş JSON Yazma Güvenliği:
+   - Eşzamanlı okuma/yazmalarda history.json dosyasının bozulmaması için atomic
+     yazma sağlanmalı.
+
+================================================================================
+İyileştirme Planı Tamamlandı. Uygulama güncellemelerine geçiliyor.
+================================================================================

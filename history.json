@@ -1,0 +1,50 @@
+[
+    {
+        "id": "1783024151113",
+        "title": "Yavru kedi suyla oynuyor",
+        "url": "https://www.youtube.com/watch?v=_hhYiNYifsY",
+        "format": "MP4",
+        "quality": "480p",
+        "date": "2026-07-02 23:29",
+        "thumbnail": "https://i.ytimg.com/vi/_hhYiNYifsY/hqdefault.jpg?sqp=-oaymwEmCOADEOgC8quKqQMa8AEB-AH-BIAC4AOKAgwIABABGGUgZShlMA8=&rs=AOn4CLBC5W7bOsMQnvU-ZZazXCfYjSEGZQ",
+        "path": "C:\\Users\\brsbe\\Downloads\\Yavru kedi suyla oynuyor.mp4",
+        "duration": "31",
+        "exists": true
+    },
+    {
+        "id": "1783023629149",
+        "title": "AC/DC - TNT (Blazy, Change & Vermont Remix)",
+        "url": "https://www.youtube.com/watch?v=wV2pVfTICqs",
+        "format": "MP3",
+        "quality": "320k",
+        "date": "2026-07-02 23:20",
+        "thumbnail": "https://i.ytimg.com/vi/wV2pVfTICqs/maxresdefault.jpg",
+        "path": "D:\\Antigravity\\yt_downloader\\downloads\\AC⧸DC - TNT (Blazy, Change & Vermont Remix).mp3",
+        "duration": "6:19",
+        "exists": true
+    },
+    {
+        "id": "1783022882681",
+        "title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
+        "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "format": "MP3",
+        "quality": "128k",
+        "date": "2026-07-02 23:08",
+        "thumbnail": "https://i.ytimg.com/vi_webp/dQw4w9WgXcQ/maxresdefault.webp",
+        "path": "D:\\Antigravity\\yt_downloader\\downloads\\Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster).mp3",
+        "duration": "3:33",
+        "exists": true
+    },
+    {
+        "id": "legacy_3_1783024560",
+        "title": "SONNE - [Animation Meme] - Solarballs",
+        "url": "https://www.youtube.com/watch?v=s-_Nhk1OiBI",
+        "format": "MP3",
+        "quality": "480p",
+        "date": "2025-11-25 00:05",
+        "thumbnail": "https://i.ytimg.com/vi_webp/s-_Nhk1OiBI/maxresdefault.webp",
+        "path": "C:\\Users\\brsbe\\Desktop\\yt_downloader\\downloads\\SONNE - [Animation Meme] - Solarballs.mp3",
+        "duration": "",
+        "exists": false
+    }
+]

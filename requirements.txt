@@ -1,0 +1,6 @@
+yt-dlp
+pywebview
+imageio-ffmpeg
+mutagen
+Pillow
+requests
