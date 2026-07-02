@@ -18,7 +18,7 @@
 
 - 🎥 **1080p Full HD Video Downloads**: Merges YouTube video and audio streams seamlessly using FFmpeg for lossless 1080p, 720p, and 480p output.
 - 🎵 **320 kbps Studio Quality Audio**: Embeds title, artist, and original high-res album cover art (JPEG) into MP3 ID3 metadata tags automatically.
-- 📂 **Smart Downloads Directory**: Auto-detects custom Windows Downloads folder locations (e.g. `D:\Downloads`) via Windows Registry (`User Shell Folders`).
+- 📂 **Smart Downloads Directory**: Auto-detects custom Windows Downloads folder locations (e.g. `C:\Downloads`) via Windows Registry (`User Shell Folders`).
 - ⚡ **Sub-Millisecond RAM Cache History**: In-memory caching architecture delivers 4-microsecond (0.000004s) history list rendering with zero freezing.
 - 📋 **One-Click Clipboard Paste**: Integrated native Windows C-API (`ctypes.windll.user32`) for instant, zero-delay URL pasting.
 - 🎨 **Modern Dark UI**: Sleek dark mode interface designed with PyWebView and Tailwind CSS, featuring glassmorphism and dynamic micro-animations.
