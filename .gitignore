@@ -14,12 +14,18 @@ build/
 dist/
 *.spec
 
-# Local Downloads
+# User local history data
+history.json
+history.json.tmp
+
+# Local Downloads & Media
 downloads/
 *.mp4
 *.mp3
 *.m4a
 *.webm
+*.txt
+!requirements.txt
 
 # IDEs & OS files
 .vscode/
