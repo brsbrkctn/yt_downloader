@@ -235,7 +235,9 @@ def main():
     window = webview.create_window(**create_args)
     window_holder['window'] = window
 
-    webview.start(debug=False, private_mode=False)
+    webview_data_dir = os.path.join(get_app_data_dir(), "webview2")
+    os.makedirs(webview_data_dir, exist_ok=True)
+    webview.start(debug=False, private_mode=False, storage_path=webview_data_dir)
 
 if __name__ == "__main__":
     main()
