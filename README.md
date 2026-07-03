@@ -3,7 +3,7 @@
   # 🎬 YT Downloader
   ### High-Performance Standalone YouTube MP4 & MP3 Converter
 
-  [![Version](https://img.shields.io/badge/version-v2.0.1-blue.svg?style=for-the-badge)](https://github.com/brsbrkctn/yt_downloader)
+  [![Version](https://img.shields.io/badge/version-v2.1.0-blue.svg?style=for-the-badge)](https://github.com/brsbrkctn/yt_downloader)
   [![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)](LICENSE)
   [![Python](https://img.shields.io/badge/python-3.10+-yellow.svg?style=for-the-badge)](https://www.python.org/)
   [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6.svg?style=for-the-badge)](https://microsoft.com/windows)
