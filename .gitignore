@@ -14,9 +14,10 @@ build/
 dist/
 *.spec
 
-# User local history data
+# User local history & config data
 history.json
 history.json.tmp
+config.json
 
 # Local Downloads & Media
 downloads/

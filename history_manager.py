@@ -4,7 +4,12 @@ import subprocess
 import threading
 from datetime import datetime
 
-HISTORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "history.json")
+def get_app_dir():
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
+
+HISTORY_FILE = os.path.join(get_app_dir(), "history.json")
 
 def get_user_downloads_dir():
     try:

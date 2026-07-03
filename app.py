@@ -1,11 +1,35 @@
 import os
 import sys
 import time
+import json
 import ctypes
 import threading
 import webview
 from downloader import YTDownloaderEngine
 from history_manager import HistoryManager
+
+def get_app_dir():
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
+
+CONFIG_FILE = os.path.join(get_app_dir(), "config.json")
+
+def load_config():
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+def save_config(cfg):
+    try:
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
 
 def get_clipboard_text():
     try:
@@ -71,6 +95,20 @@ class YTDownloaderAPI:
             pass
         return "en"
 
+    def get_language(self):
+        cfg = load_config()
+        if "lang" in cfg and cfg["lang"] in ["tr", "en"]:
+            return cfg["lang"]
+        return self.get_system_language()
+
+    def save_language(self, lang):
+        if lang in ["tr", "en"]:
+            cfg = load_config()
+            cfg["lang"] = lang
+            save_config(cfg)
+            return True
+        return False
+
     def fetch_info(self, url):
         try:
             info = self.engine.fetch_info(url)
@@ -81,7 +119,6 @@ class YTDownloaderAPI:
     def start_download(self, url, format_type, quality):
         def progress_callback(progress_data):
             if self.window:
-                import json
                 progress_json = json.dumps(progress_data)
                 js_code = f"if (window.updateProgress) window.updateProgress({progress_json});"
                 self.window.evaluate_js(js_code)
@@ -90,11 +127,9 @@ class YTDownloaderAPI:
             try:
                 result_item = self.engine.download(url, format_type, quality, progress_callback=progress_callback)
                 if self.window:
-                    import json
                     js_code = f"if (window.onDownloadComplete) window.onDownloadComplete({json.dumps(result_item)});"
                     self.window.evaluate_js(js_code)
             except Exception as e:
-                import json
                 error_msg = str(e)
                 if self.window:
                     err_payload = {"status": "error", "percent": 0, "text": f"Hata: {error_msg}"}

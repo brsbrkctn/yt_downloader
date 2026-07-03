@@ -97,12 +97,13 @@
         <!-- TAB 1: ANA SAYFA (HOME) -->
         <section id="tab-home" class="flex flex-col gap-8 py-4">
             
-            <!-- Hero Header -->
-            <div class="text-center flex flex-col gap-3 max-w-2xl mx-auto pt-4">
-                <h1 id="t-hero-title" class="text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">
-                    En Hızlı YouTube Dönüştürücü
+            <!-- Hero Header (Strictly Two Lines as requested) -->
+            <div class="text-center flex flex-col gap-2 max-w-2xl mx-auto pt-4">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight text-white leading-tight flex flex-col items-center">
+                    <span id="t-hero-line1" class="text-primary">En Hızlı</span>
+                    <span id="t-hero-line2" class="text-white">YouTube Dönüştürücü</span>
                 </h1>
-                <p id="t-hero-desc" class="text-slate-400 text-base md:text-lg">
+                <p id="t-hero-desc" class="text-slate-400 text-base md:text-lg mt-1">
                     YouTube videosu veya müzik linkini yapıştırın, MP3 veya MP4 olarak anında indirin.
                 </p>
             </div>
@@ -400,7 +401,8 @@
                 navHome: "Ana Sayfa",
                 navHistory: "Geçmiş",
                 navAbout: "Hakkında",
-                heroTitle: "En Hızlı YouTube Dönüştürücü",
+                heroLine1: "En Hızlı",
+                heroLine2: "YouTube Dönüştürücü",
                 heroDesc: "YouTube videosu veya müzik linkini yapıştırın, MP3 veya MP4 olarak anında indirin.",
                 urlPlaceholder: "https://www.youtube.com/watch?v=... veya https://youtu.be/...",
                 btnConvert: "Dönüştür",
@@ -445,7 +447,8 @@
                 navHome: "Home",
                 navHistory: "History",
                 navAbout: "About",
-                heroTitle: "Fastest YouTube Converter",
+                heroLine1: "Fastest",
+                heroLine2: "YouTube Converter",
                 heroDesc: "Paste a YouTube video or music link, convert and download instantly as MP3 or MP4.",
                 urlPlaceholder: "https://www.youtube.com/watch?v=... or https://youtu.be/...",
                 btnConvert: "Convert",
@@ -488,10 +491,17 @@
             }
         };
 
-        function setLanguage(lang) {
+        async function setLanguage(lang) {
             currentLang = (lang === "tr" || lang === "en") ? lang : "en";
             localStorage.setItem("yt_downloader_lang", currentLang);
             applyLanguage();
+            if (window.pywebview && window.pywebview.api && window.pywebview.api.save_language) {
+                try {
+                    await window.pywebview.api.save_language(currentLang);
+                } catch(e) {
+                    console.error("Save language error:", e);
+                }
+            }
         }
 
         function toggleLanguage() {
@@ -507,7 +517,8 @@
             document.getElementById("t-nav-history").innerText = t.navHistory;
             document.getElementById("t-nav-about").innerText = t.navAbout;
 
-            document.getElementById("t-hero-title").innerText = t.heroTitle;
+            document.getElementById("t-hero-line1").innerText = t.heroLine1;
+            document.getElementById("t-hero-line2").innerText = t.heroLine2;
             document.getElementById("t-hero-desc").innerText = t.heroDesc;
             document.getElementById("url-input").placeholder = t.urlPlaceholder;
             document.getElementById("fetch-btn-text").innerText = t.btnConvert;
@@ -599,7 +610,10 @@
                 historyTab.classList.remove("hidden");
                 btnHistory.className = "px-5 py-2 rounded-lg text-sm font-bold transition-all bg-primary text-white shadow-lg shadow-primary/20 flex items-center gap-2";
                 btnHome.className = "px-5 py-2 rounded-lg text-sm font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/40 flex items-center gap-2";
-                loadHistory();
+                // Defer history loading slightly to prevent IPC thread deadlock on quick tab clicks
+                setTimeout(() => {
+                    loadHistory();
+                }, 10);
             }
         }
 
@@ -793,9 +807,13 @@
         }
 
         async function loadHistory() {
-            if (window.pywebview && window.pywebview.api) {
-                historyData = await window.pywebview.api.get_history();
-                renderHistory();
+            if (window.pywebview && window.pywebview.api && window.pywebview.api.get_history) {
+                try {
+                    historyData = await window.pywebview.api.get_history();
+                    renderHistory();
+                } catch(e) {
+                    console.error("History load error:", e);
+                }
             }
         }
 
@@ -950,22 +968,22 @@
             }
         }
 
-        // Auto-detect system language or load stored preference on ready
+        // Load language preference persistently from Python or localStorage ONLY when pywebview is ready
         async function initLanguage() {
-            const savedLang = localStorage.getItem("yt_downloader_lang");
-            if (savedLang) {
-                currentLang = savedLang;
-            } else if (window.pywebview && window.pywebview.api) {
+            let pref = null;
+            if (window.pywebview && window.pywebview.api && window.pywebview.api.get_language) {
                 try {
-                    const sysLang = await window.pywebview.api.get_system_language();
-                    currentLang = (sysLang === "tr") ? "tr" : "en";
-                } catch (e) {
-                    currentLang = "en";
-                }
-            } else {
-                const navLang = (navigator.language || "").toLowerCase();
-                currentLang = navLang.startsWith("tr") ? "tr" : "en";
+                    pref = await window.pywebview.api.get_language();
+                } catch (e) {}
             }
+            if (!pref) {
+                pref = localStorage.getItem("yt_downloader_lang");
+            }
+            if (!pref) {
+                const navLang = (navigator.language || "").toLowerCase();
+                pref = navLang.startsWith("tr") ? "tr" : "en";
+            }
+            currentLang = (pref === "tr" || pref === "en") ? pref : "en";
             applyLanguage();
         }
 
@@ -973,8 +991,13 @@
             initLanguage();
         });
 
+        // Fallback for standalone browser testing only if pywebview doesn't load
         document.addEventListener("DOMContentLoaded", function() {
-            initLanguage();
+            setTimeout(() => {
+                if (!window.pywebview) {
+                    initLanguage();
+                }
+            }, 300);
         });
     </script>
 </body>
