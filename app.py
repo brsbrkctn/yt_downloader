@@ -53,6 +53,24 @@ class YTDownloaderAPI:
     def window(self):
         return self.window_holder.get('window')
 
+    def get_system_language(self):
+        try:
+            import locale
+            lang_code = locale.getdefaultlocale()[0]
+            if not lang_code:
+                lang_code = locale.getlocale()[0]
+            if lang_code and lang_code.lower().startswith("tr"):
+                return "tr"
+        except Exception:
+            pass
+        try:
+            lang_id = ctypes.windll.kernel32.GetUserDefaultUILanguage()
+            if (lang_id & 0xFF) == 0x1F:  # Primary language ID for Turkish is 0x1F
+                return "tr"
+        except Exception:
+            pass
+        return "en"
+
     def fetch_info(self, url):
         try:
             info = self.engine.fetch_info(url)
@@ -80,7 +98,7 @@ class YTDownloaderAPI:
                 error_msg = str(e)
                 if self.window:
                     err_payload = {"status": "error", "percent": 0, "text": f"Hata: {error_msg}"}
-                    self.window.evaluate_js(f"if (window.updateProgress) window.updateProgress({json.dumps(err_payload)});")
+                    self.window.evaluate_js(f"if (window.updateProgress) window.updateProgress({json.dumps(err_payload)});" )
 
         threading.Thread(target=worker, daemon=True).start()
         return {"success": True}
@@ -109,24 +127,32 @@ def main():
     window_holder = {}
     api = YTDownloaderAPI(window_holder)
 
-    window = webview.create_window(
-        title="YT Downloader v2.0.2",
-        url=file_url,
-        js_api=api,
-        width=1040,
-        height=780,
-        min_size=(850, 650),
-        background_color='#101622'
-    )
+    # Calculate centered position natively without using events.shown to avoid Win32 deadlock
+    try:
+        user32 = ctypes.windll.user32
+        screen_w = user32.GetSystemMetrics(0)
+        screen_h = user32.GetSystemMetrics(1)
+        win_w, win_h = 1040, 780
+        pos_x = max(0, (screen_w - win_w) // 2)
+        pos_y = max(0, (screen_h - win_h) // 2)
+    except Exception:
+        pos_x, pos_y = None, None
+
+    create_args = {
+        "title": "YT Downloader",
+        "url": file_url,
+        "js_api": api,
+        "width": 1040,
+        "height": 780,
+        "min_size": (850, 650),
+        "background_color": "#101622"
+    }
+    if pos_x is not None and pos_y is not None:
+        create_args["x"] = pos_x
+        create_args["y"] = pos_y
+
+    window = webview.create_window(**create_args)
     window_holder['window'] = window
-
-    def on_shown():
-        try:
-            window.center()
-        except Exception:
-            pass
-
-    window.events.shown += on_shown
 
     webview.start(debug=False)
 

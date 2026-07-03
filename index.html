@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>YT Downloader v2.0.2</title>
+    <title>YT Downloader</title>
     <!-- Local offline Tailwind CSS compiler -->
     <script src="tailwind.js"></script>
     <style>
@@ -53,7 +53,6 @@
     <header class="border-b border-border-dark px-6 py-4 flex items-center justify-between bg-background-dark/90 backdrop-blur sticky top-0 z-40">
         <div class="flex items-center gap-3">
             <div class="size-9 bg-primary/20 rounded-xl flex items-center justify-center border border-primary/30 overflow-hidden shrink-0">
-                <!-- Unified internal logo image (icon2.ico) -->
                 <img src="icon2.ico" class="size-6 object-contain" alt="Logo"/>
             </div>
             <div class="flex flex-col">
@@ -64,25 +63,30 @@
 
         <nav class="flex items-center gap-2 bg-card-dark p-1 rounded-xl border border-border-dark">
             <button id="nav-home" onclick="switchTab('home')" class="px-5 py-2 rounded-lg text-sm font-bold transition-all bg-primary text-white shadow-lg shadow-primary/20 flex items-center gap-2">
-                <!-- SVG: home -->
                 <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                 </svg>
-                Ana Sayfa
+                <span id="t-nav-home">Ana Sayfa</span>
             </button>
             <button id="nav-history" onclick="switchTab('history')" class="px-5 py-2 rounded-lg text-sm font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/40 flex items-center gap-2">
-                <!-- SVG: history -->
                 <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Geçmiş
+                <span id="t-nav-history">Geçmiş</span>
             </button>
             <button onclick="openAboutModal()" class="px-4 py-2 rounded-lg text-sm font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/40 flex items-center gap-1.5">
-                <!-- SVG: info -->
                 <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Hakkında
+                <span id="t-nav-about">Hakkında</span>
+            </button>
+            
+            <!-- Language Selector Toggle Button -->
+            <button id="btn-lang-toggle" onclick="toggleLanguage()" title="Language / Dil" class="px-3 py-2 rounded-lg text-xs font-bold transition-all bg-background-dark hover:bg-slate-800 border border-border-dark text-primary flex items-center gap-1.5 ml-1">
+                <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                </svg>
+                <span id="lang-indicator">TR</span>
             </button>
         </nav>
     </header>
@@ -95,10 +99,10 @@
             
             <!-- Hero Header -->
             <div class="text-center flex flex-col gap-3 max-w-2xl mx-auto pt-4">
-                <h1 class="text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">
+                <h1 id="t-hero-title" class="text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">
                     En Hızlı YouTube Dönüştürücü
                 </h1>
-                <p class="text-slate-400 text-base md:text-lg">
+                <p id="t-hero-desc" class="text-slate-400 text-base md:text-lg">
                     YouTube videosu veya müzik linkini yapıştırın, MP3 veya MP4 olarak anında indirin.
                 </p>
             </div>
@@ -107,7 +111,6 @@
             <div class="max-w-2xl w-full mx-auto flex flex-col gap-3">
                 <div class="flex items-center bg-card-dark border border-border-dark rounded-2xl p-2 shadow-xl focus-within:border-primary transition-all">
                     <div class="pl-4 text-slate-400 flex items-center justify-center">
-                        <!-- SVG: link -->
                         <svg class="size-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                         </svg>
@@ -118,20 +121,17 @@
                            onkeypress="if(event.key==='Enter') fetchVideoInfo()"/>
                     
                     <button id="btn-clear" onclick="clearInput()" title="Temizle" class="hidden p-2 text-slate-400 hover:text-white transition-colors mr-1">
-                        <!-- SVG: clear -->
                         <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
                     <button onclick="pasteFromClipboard()" title="Panodan Yapıştır" class="p-2 text-slate-400 hover:text-primary transition-colors mr-1 flex items-center justify-center">
-                        <!-- SVG: content_paste -->
                         <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
                     </button>
                     <button id="btn-fetch" onclick="fetchVideoInfo()" 
                             class="bg-primary hover:bg-primary/90 text-white font-bold px-6 py-3 rounded-xl transition-all flex items-center gap-2 shrink-0 shadow-lg shadow-primary/20">
-                        <!-- SVG: search -->
                         <svg id="fetch-btn-icon" class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
@@ -141,13 +141,11 @@
 
                 <!-- Inline Error Banner -->
                 <div id="error-banner" class="hidden items-center gap-3 bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-2xl text-sm font-medium animate-fade-in">
-                    <!-- SVG: error -->
                     <svg class="size-5 text-red-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
                     <span id="error-message" class="flex-1 leading-normal">Bir hata oluştu.</span>
                     <button onclick="hideError()" class="text-red-400/70 hover:text-red-400 p-1">
-                        <!-- SVG: close -->
                         <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -158,7 +156,7 @@
             <!-- Fetch Loading Spinner -->
             <div id="fetch-loading" class="hidden flex-col items-center justify-center py-10 gap-4 text-slate-400 w-full max-w-2xl mx-auto text-center">
                 <div class="size-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-                <p class="text-base font-semibold text-slate-300">Video bilgileri getiriliyor...</p>
+                <p id="t-fetch-loading" class="text-base font-semibold text-slate-300">Video bilgileri getiriliyor...</p>
             </div>
 
             <!-- Video Preview & Download Card -->
@@ -196,7 +194,7 @@
                             MP4 (Video)
                         </button>
                         <button id="fmt-mp3" onclick="setFormat('MP3')" class="flex-1 sm:flex-initial px-6 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white transition-all">
-                            MP3 (Ses)
+                            <span id="t-fmt-mp3-label">MP3 (Ses)</span>
                         </button>
                     </div>
 
@@ -209,11 +207,10 @@
 
                     <!-- Download Button -->
                     <button id="btn-download" onclick="startDownload()" class="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white font-bold px-8 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
-                        <!-- SVG: download -->
                         <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                         </svg>
-                        <span>İndir</span>
+                        <span id="t-btn-download">İndir</span>
                     </button>
                 </div>
 
@@ -235,18 +232,16 @@
                 <!-- Download Success Actions -->
                 <div id="success-actions" class="hidden flex-wrap gap-3 pt-2">
                     <button id="btn-open-file" onclick="openDownloadedFile()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
-                        <!-- SVG: play_circle -->
                         <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        Dosyayı Aç
+                        <span id="t-btn-open-file">Dosyayı Aç</span>
                     </button>
                     <button id="btn-open-folder" onclick="openDownloadedFolder()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2">
-                        <!-- SVG: folder_open -->
                         <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9l-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                         </svg>
-                        Klasörü Aç
+                        <span id="t-btn-open-folder">Klasörü Aç</span>
                     </button>
                 </div>
 
@@ -260,14 +255,13 @@
             <!-- Page Header & Spacing -->
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 pb-3 border-b border-border-dark/60">
                 <div>
-                    <h1 class="text-3xl font-black text-white">Geçmişim</h1>
+                    <h1 id="t-history-page-title" class="text-3xl font-black text-white">Geçmişim</h1>
                 </div>
                 
                 <!-- Search & Filters -->
                 <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                     <div class="flex items-center h-11 w-full sm:w-64 relative">
                         <div class="absolute left-3.5 top-0 bottom-0 flex items-center pointer-events-none text-slate-400">
-                            <!-- SVG: search -->
                             <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
@@ -291,17 +285,16 @@
             <!-- Empty State -->
             <div id="history-empty" class="hidden flex-col items-center justify-center text-center p-12 border-2 border-dashed border-border-dark rounded-2xl gap-4 my-8">
                 <div class="size-16 rounded-full bg-card-dark border border-border-dark flex items-center justify-center text-slate-400">
-                    <!-- SVG: history -->
                     <svg class="size-8 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
                 <div class="flex flex-col gap-1">
-                    <h3 class="text-lg font-bold text-white">Henüz indirme yapmadınız</h3>
-                    <p class="text-slate-400 text-sm">İndirdiğiniz videolar burada listelenecektir.</p>
+                    <h3 id="t-empty-title" class="text-lg font-bold text-white">Henüz indirme yapmadınız</h3>
+                    <p id="t-empty-desc" class="text-slate-400 text-sm">İndirdiğiniz videolar burada listelenecektir.</p>
                 </div>
                 <button onclick="switchTab('home')" class="bg-primary hover:bg-primary/90 text-white font-bold px-6 py-2.5 rounded-xl transition-all text-sm mt-2">
-                    Yeni Video İndir
+                    <span id="t-btn-new-video">Yeni Video İndir</span>
                 </button>
             </div>
 
@@ -314,14 +307,13 @@
         <div class="bg-card-dark border border-border-dark max-w-md w-full rounded-2xl p-6 flex flex-col gap-5 shadow-2xl animate-fade-in">
             <div class="flex items-center gap-3 text-red-400">
                 <div class="size-11 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
-                    <!-- SVG: delete_forever -->
                     <svg class="size-6 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16m-10 4h10"/>
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold text-white">Geçmişten Sil</h3>
-                    <p class="text-xs text-slate-400">Bu ögeyi geçmiş listenizden kaldırın.</p>
+                    <h3 id="t-delete-modal-title" class="text-lg font-bold text-white">Geçmişten Sil</h3>
+                    <p id="t-delete-modal-sub" class="text-xs text-slate-400">Bu ögeyi geçmiş listenizden kaldırın.</p>
                 </div>
             </div>
             <p id="delete-modal-title" class="text-sm text-slate-300 bg-background-dark p-3.5 rounded-xl border border-border-dark font-medium leading-relaxed line-clamp-2">
@@ -331,15 +323,15 @@
             <!-- File Deletion Checkbox Option -->
             <label class="flex items-center gap-3 bg-background-dark/60 p-3 rounded-xl border border-border-dark/60 cursor-pointer select-none">
                 <input type="checkbox" id="delete-file-checkbox" class="rounded border-border-dark bg-background-dark text-primary focus:ring-primary size-4"/>
-                <span class="text-xs text-slate-300 font-medium">İndirilen dosyayı bilgisayarımdan da kalıcı olarak sil</span>
+                <span id="t-delete-file-check" class="text-xs text-slate-300 font-medium">İndirilen dosyayı bilgisayarımdan da kalıcı olarak sil</span>
             </label>
 
             <div class="flex items-center justify-end gap-3 pt-2">
                 <button onclick="closeDeleteModal()" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:text-white bg-background-dark border border-border-dark transition-all">
-                    Vazgeç
+                    <span id="t-btn-cancel">Vazgeç</span>
                 </button>
                 <button id="btn-confirm-delete" onclick="confirmDeleteAction()" class="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-500 shadow-lg shadow-red-600/20 transition-all">
-                    Sil
+                    <span id="t-btn-delete">Sil</span>
                 </button>
             </div>
         </div>
@@ -350,7 +342,6 @@
         <div class="bg-card-dark border border-border-dark max-w-md w-full rounded-2xl p-6 flex flex-col gap-6 shadow-2xl animate-fade-in relative">
             
             <button onclick="closeAboutModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1">
-                <!-- SVG: close -->
                 <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -358,7 +349,6 @@
 
             <div class="flex items-center gap-4">
                 <div class="size-14 bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/30 overflow-hidden shrink-0">
-                    <!-- Unified internal logo image (icon2.ico) -->
                     <img src="icon2.ico" class="size-10 object-contain" alt="Logo"/>
                 </div>
                 <div class="flex flex-col">
@@ -367,21 +357,21 @@
                 </div>
             </div>
 
-            <p class="text-sm text-slate-300 leading-relaxed">
-                Yüksek hızlı YouTube MP4 ve MP3 dönüştürücü. Akıllı format birleştirme, otomatik albüm kapağı işleme ve dinamik klasör tespiti ile güçlendiritmiştir.
+            <p id="t-about-desc" class="text-sm text-slate-300 leading-relaxed">
+                Yüksek hızlı YouTube MP4 ve MP3 dönüştürücü. Akıllı format birleştirme, otomatik albüm kapağı işleme ve dinamik klasör tespiti ile güçlendirilmiştir.
             </p>
 
             <div class="bg-background-dark p-4 rounded-xl border border-border-dark flex flex-col gap-3">
                 <div class="flex items-center justify-between text-xs">
-                    <span class="text-slate-400 font-medium">Geliştirici:</span>
+                    <span id="t-about-dev" class="text-slate-400 font-medium">Geliştirici:</span>
                     <span class="text-white font-bold">Barış Berke Çetin</span>
                 </div>
                 <div class="flex items-center justify-between text-xs">
-                    <span class="text-slate-400 font-medium">Motor & Teknolojiler:</span>
+                    <span id="t-about-tech" class="text-slate-400 font-medium">Motor & Teknolojiler:</span>
                     <span class="text-slate-200 font-semibold">Python 3 • PyWebView • yt-dlp • FFmpeg</span>
                 </div>
                 <div class="flex items-center justify-between text-xs pt-1 border-t border-border-dark/60">
-                    <span class="text-slate-400 font-medium">GitHub Profil:</span>
+                    <span id="t-about-github" class="text-slate-400 font-medium">GitHub Profil:</span>
                     <a href="https://github.com/brsbrkctn" target="_blank" onclick="openGithub(event)" class="text-primary hover:underline font-bold flex items-center gap-1">
                         brsbrkctn <svg class="size-3.5 inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                     </a>
@@ -390,7 +380,7 @@
 
             <div class="flex items-center justify-end pt-1">
                 <button onclick="closeAboutModal()" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-lg shadow-primary/20">
-                    Tamam
+                    <span id="t-btn-ok">Tamam</span>
                 </button>
             </div>
         </div>
@@ -403,6 +393,155 @@
         let activeFilter = "ALL";
         let lastDownloadedPath = null;
         let pendingDeleteId = null;
+        let currentLang = "tr";
+
+        const i18n = {
+            tr: {
+                navHome: "Ana Sayfa",
+                navHistory: "Geçmiş",
+                navAbout: "Hakkında",
+                heroTitle: "En Hızlı YouTube Dönüştürücü",
+                heroDesc: "YouTube videosu veya müzik linkini yapıştırın, MP3 veya MP4 olarak anında indirin.",
+                urlPlaceholder: "https://www.youtube.com/watch?v=... veya https://youtu.be/...",
+                btnConvert: "Dönüştür",
+                btnDownload: "İndir",
+                btnOpenFile: "Dosyayı Aç",
+                btnOpenFolder: "Klasörü Aç",
+                historyTitle: "Geçmişim",
+                searchPlaceholder: "Geçmişte ara...",
+                filterAll: "Tümü",
+                emptyTitle: "Henüz indirme yapmadınız",
+                emptyDesc: "İndirdiğiniz videolar burada listelenecektir.",
+                btnNewVideo: "Yeni Video İndir",
+                deleteModalTitle: "Geçmişten Sil",
+                deleteModalSub: "Bu ögeyi geçmiş listenizden kaldırın.",
+                deleteFileCheck: "İndirilen dosyayı bilgisayarımdan da kalıcı olarak sil",
+                btnCancel: "Vazgeç",
+                btnDelete: "Sil",
+                aboutDesc: "Yüksek hızlı YouTube MP4 ve MP3 dönüştürücü. Akıllı format birleştirme, otomatik albüm kapağı işleme ve dinamik klasör tespiti ile güçlendirilmiştir.",
+                aboutDev: "Geliştirici:",
+                aboutTech: "Motor & Teknolojiler:",
+                aboutGithub: "GitHub Profil:",
+                btnOk: "Tamam",
+                errInvalidUrl: "Lütfen geçerli bir YouTube video linki girin.",
+                errFetch: "Video bilgileri alınamadı. Linki kontrol edin.",
+                errBackend: "Uygulama arka plan bağlantısı kurulamadı.",
+                errUnexpected: "Video bilgileri alınırken beklenmeyen bir hata oluştu: ",
+                unknownVideo: "Bilinmeyen Video",
+                fetchingInfo: "Video bilgileri getiriliyor...",
+                startingDownload: "İndirme başlatılıyor...",
+                downloading: "İndiriliyor...",
+                downloadCompleted: "İndirme Tamamlandı!",
+                speed: "Hız",
+                eta: "Kalan Süre",
+                fileMovedOrDeleted: "Dosya Taşınmış/Silinmiş",
+                mp3AudioLabel: "MP3 (Ses)",
+                studioQuality: "320 kbps (Stüdyo Kalitesi)",
+                highQuality: "256 kbps (Yüksek)",
+                stdQuality: "192 kbps (Standart)",
+                lowQuality: "128 kbps (Düşük)"
+            },
+            en: {
+                navHome: "Home",
+                navHistory: "History",
+                navAbout: "About",
+                heroTitle: "Fastest YouTube Converter",
+                heroDesc: "Paste a YouTube video or music link, convert and download instantly as MP3 or MP4.",
+                urlPlaceholder: "https://www.youtube.com/watch?v=... or https://youtu.be/...",
+                btnConvert: "Convert",
+                btnDownload: "Download",
+                btnOpenFile: "Open File",
+                btnOpenFolder: "Open Folder",
+                historyTitle: "History",
+                searchPlaceholder: "Search history...",
+                filterAll: "All",
+                emptyTitle: "No downloads yet",
+                emptyDesc: "Videos you download will be listed here.",
+                btnNewVideo: "Download New Video",
+                deleteModalTitle: "Remove from History",
+                deleteModalSub: "Remove this item from your history list.",
+                deleteFileCheck: "Permanently delete the downloaded file from my disk as well",
+                btnCancel: "Cancel",
+                btnDelete: "Delete",
+                aboutDesc: "High-performance YouTube MP4 and MP3 converter. Powered by smart format merging, automatic album art tagging, and dynamic folder detection.",
+                aboutDev: "Developer:",
+                aboutTech: "Engine & Tech:",
+                aboutGithub: "GitHub Profile:",
+                btnOk: "OK",
+                errInvalidUrl: "Please enter a valid YouTube video URL.",
+                errFetch: "Failed to fetch video information. Please check the link.",
+                errBackend: "Failed to connect to the application backend.",
+                errUnexpected: "An unexpected error occurred while fetching video info: ",
+                unknownVideo: "Unknown Video",
+                fetchingInfo: "Fetching video information...",
+                startingDownload: "Starting download...",
+                downloading: "Downloading...",
+                downloadCompleted: "Download Completed!",
+                speed: "Speed",
+                eta: "ETA",
+                fileMovedOrDeleted: "File Moved or Deleted",
+                mp3AudioLabel: "MP3 (Audio)",
+                studioQuality: "320 kbps (Studio Quality)",
+                highQuality: "256 kbps (High)",
+                stdQuality: "192 kbps (Standard)",
+                lowQuality: "128 kbps (Low)"
+            }
+        };
+
+        function setLanguage(lang) {
+            currentLang = (lang === "tr" || lang === "en") ? lang : "en";
+            localStorage.setItem("yt_downloader_lang", currentLang);
+            applyLanguage();
+        }
+
+        function toggleLanguage() {
+            const newLang = currentLang === "tr" ? "en" : "tr";
+            setLanguage(newLang);
+        }
+
+        function applyLanguage() {
+            const t = i18n[currentLang] || i18n.en;
+            document.getElementById("lang-indicator").innerText = currentLang.toUpperCase();
+            
+            document.getElementById("t-nav-home").innerText = t.navHome;
+            document.getElementById("t-nav-history").innerText = t.navHistory;
+            document.getElementById("t-nav-about").innerText = t.navAbout;
+
+            document.getElementById("t-hero-title").innerText = t.heroTitle;
+            document.getElementById("t-hero-desc").innerText = t.heroDesc;
+            document.getElementById("url-input").placeholder = t.urlPlaceholder;
+            document.getElementById("fetch-btn-text").innerText = t.btnConvert;
+
+            document.getElementById("t-fetch-loading").innerText = t.fetchingInfo;
+            document.getElementById("t-fmt-mp3-label").innerText = t.mp3AudioLabel;
+            document.getElementById("t-btn-download").innerText = t.btnDownload;
+            document.getElementById("t-btn-open-file").innerText = t.btnOpenFile;
+            document.getElementById("t-btn-open-folder").innerText = t.btnOpenFolder;
+
+            document.getElementById("t-history-page-title").innerText = t.historyTitle;
+            document.getElementById("search-input").placeholder = t.searchPlaceholder;
+            document.getElementById("filter-all").innerText = t.filterAll;
+            document.getElementById("t-empty-title").innerText = t.emptyTitle;
+            document.getElementById("t-empty-desc").innerText = t.emptyDesc;
+            document.getElementById("t-btn-new-video").innerText = t.btnNewVideo;
+
+            document.getElementById("t-delete-modal-title").innerText = t.deleteModalTitle;
+            document.getElementById("t-delete-modal-sub").innerText = t.deleteModalSub;
+            document.getElementById("t-delete-file-check").innerText = t.deleteFileCheck;
+            document.getElementById("t-btn-cancel").innerText = t.btnCancel;
+            document.getElementById("t-btn-delete").innerText = t.btnDelete;
+
+            document.getElementById("t-about-desc").innerText = t.aboutDesc;
+            document.getElementById("t-about-dev").innerText = t.aboutDev;
+            document.getElementById("t-about-tech").innerText = t.aboutTech;
+            document.getElementById("t-about-github").innerText = t.aboutGithub;
+            document.getElementById("t-btn-ok").innerText = t.btnOk;
+
+            if (currentVideoInfo) {
+                setFormat(currentFormat);
+            }
+            renderHistory();
+        }
 
         function escapeHtml(text) {
             if (!text) return "";
@@ -433,7 +572,7 @@
         function showError(msg) {
             const banner = document.getElementById("error-banner");
             const msgEl = document.getElementById("error-message");
-            msgEl.innerText = msg || "Bir hata oluştu.";
+            msgEl.innerText = msg || (i18n[currentLang] || i18n.en).errFetch;
             banner.classList.remove("hidden");
             banner.classList.add("flex");
         }
@@ -467,7 +606,6 @@
         async function pasteFromClipboard() {
             try {
                 let text = "";
-                // If running in pywebview, use Python API ONLY to avoid security popup warnings
                 if (window.pywebview && window.pywebview.api) {
                     text = await window.pywebview.api.read_clipboard();
                 } else if (navigator.clipboard) {
@@ -486,11 +624,12 @@
 
         async function fetchVideoInfo() {
             hideError();
+            const t = i18n[currentLang] || i18n.en;
             const inputEl = document.getElementById("url-input");
             const url = inputEl.value.trim();
 
             if (!url) {
-                showError("Lütfen geçerli bir YouTube video linki girin.");
+                showError(t.errInvalidUrl);
                 return;
             }
 
@@ -501,7 +640,6 @@
             btnFetch.disabled = true;
             inputEl.disabled = true;
             
-            // Set sync spinning icon state
             const iconEl = document.getElementById("fetch-btn-icon");
             iconEl.classList.add("animate-spin");
 
@@ -517,13 +655,13 @@
                     if (res && res.success) {
                         displayVideoCard(res.data);
                     } else {
-                        showError((res && res.error) ? res.error : "Video bilgileri alınamadı. Linki kontrol edin.");
+                        showError((res && res.error) ? res.error : t.errFetch);
                     }
                 } else {
-                    showError("Uygulama arka plan bağlantısı kurulamadı.");
+                    showError(t.errBackend);
                 }
             } catch (err) {
-                showError("Video bilgileri alınırken beklenmeyen bir hata oluştu: " + (err.message || err));
+                showError(t.errUnexpected + (err.message || err));
             } finally {
                 btnFetch.disabled = false;
                 inputEl.disabled = false;
@@ -534,9 +672,10 @@
         }
 
         function displayVideoCard(info) {
+            const t = i18n[currentLang] || i18n.en;
             currentVideoInfo = info;
             document.getElementById("video-thumb").src = info.thumbnail || "";
-            document.getElementById("video-title").innerText = info.title || "Bilinmeyen Video";
+            document.getElementById("video-title").innerText = info.title || t.unknownVideo;
             document.getElementById("video-channel").innerText = info.channel || "YouTube";
             document.getElementById("video-duration").innerText = info.duration || "00:00";
 
@@ -554,6 +693,7 @@
 
         function setFormat(fmt) {
             currentFormat = fmt;
+            const t = i18n[currentLang] || i18n.en;
             const btnMp4 = document.getElementById("fmt-mp4");
             const btnMp3 = document.getElementById("fmt-mp3");
             const qSelect = document.getElementById("quality-select");
@@ -569,10 +709,10 @@
                 btnMp4.className = "flex-1 sm:flex-initial px-6 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white transition-all";
 
                 qSelect.innerHTML = `
-                    <option value="320k">320 kbps (Stüdyo Kalitesi)</option>
-                    <option value="256k">256 kbps (Yüksek)</option>
-                    <option value="192k">192 kbps (Standart)</option>
-                    <option value="128k">128 kbps (Düşük)</option>
+                    <option value="320k">${t.studioQuality}</option>
+                    <option value="256k">${t.highQuality}</option>
+                    <option value="192k">${t.stdQuality}</option>
+                    <option value="128k">${t.lowQuality}</option>
                 `;
             }
         }
@@ -599,8 +739,9 @@
         }
 
         function updateProgress(data) {
+            const t = i18n[currentLang] || i18n.en;
             if (data.status === "error") {
-                showError(data.text || "İndirme esnasında bir hata oluştu.");
+                showError(data.text || t.errFetch);
                 document.getElementById("btn-download").disabled = false;
                 return;
             }
@@ -611,15 +752,16 @@
             const pSpeed = document.getElementById("stat-speed");
             const pEta = document.getElementById("stat-eta");
 
-            pText.innerText = data.text || "İndiriliyor...";
+            pText.innerText = data.text || t.downloading;
             pPercent.innerText = `%${data.percent || 0}`;
             pBar.style.width = `${data.percent || 0}%`;
 
-            if (data.speed) pSpeed.innerText = `Hız: ${data.speed}`;
-            if (data.eta) pEta.innerText = `Kalan Süre: ${data.eta}`;
+            if (data.speed) pSpeed.innerText = `${t.speed}: ${data.speed}`;
+            if (data.eta) pEta.innerText = `${t.eta}: ${data.eta}`;
 
             if (data.status === "completed") {
                 document.getElementById("btn-download").disabled = false;
+                pText.innerText = t.downloadCompleted;
                 const successActions = document.getElementById("success-actions");
                 successActions.classList.remove("hidden");
                 successActions.classList.add("flex");
@@ -629,10 +771,11 @@
 
         function onDownloadComplete(item) {
             lastDownloadedPath = item.path;
+            const t = i18n[currentLang] || i18n.en;
             updateProgress({
                 status: "completed",
                 percent: 100,
-                text: "İndirme Tamamlandı!",
+                text: t.downloadCompleted,
                 path: item.path
             });
         }
@@ -668,6 +811,7 @@
             const listEl = document.getElementById("history-list");
             const emptyEl = document.getElementById("history-empty");
             const searchVal = (document.getElementById("search-input").value || "").toLowerCase();
+            const t = i18n[currentLang] || i18n.en;
 
             try {
                 let filtered = historyData.filter(item => {
@@ -688,7 +832,7 @@
 
                 listEl.innerHTML = filtered.map(item => {
                     const safeId = escapeHtml(String(item.id || ''));
-                    const safeTitle = escapeHtml(item.title || 'Video');
+                    const safeTitle = escapeHtml(item.title || t.unknownVideo);
                     const safeDate = escapeHtml(item.date || '');
                     const safeFormat = escapeHtml(item.format || '');
                     const safeQuality = escapeHtml(item.quality || '');
@@ -705,24 +849,23 @@
                                         <span class="bg-primary/20 text-primary border border-primary/30 text-xs font-bold px-2.5 py-0.5 rounded-md">
                                             ${safeFormat} ${safeQuality}
                                         </span>
-                                        ${!item.exists ? '<span class="bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold px-2.5 py-0.5 rounded-md">Dosya Taşınmış/Silinmiş</span>' : ''}
+                                        ${!item.exists ? `<span class="bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold px-2.5 py-0.5 rounded-md">${t.fileMovedOrDeleted}</span>` : ''}
                                     </div>
                                 </div>
                             </div>
 
                             <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                                <button onclick="openFileById('${safeId}')" title="Dosyayı Aç" class="p-3 rounded-xl bg-background-dark border border-border-dark text-slate-300 hover:text-emerald-400 hover:border-emerald-500/50 transition-all flex items-center justify-center">
-                                    <!-- Solid sharp play arrow svg with fill -->
+                                <button onclick="openFileById('${safeId}')" title="${t.btnOpenFile}" class="p-3 rounded-xl bg-background-dark border border-border-dark text-slate-300 hover:text-emerald-400 hover:border-emerald-500/50 transition-all flex items-center justify-center">
                                     <svg class="size-5" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M8 5v14l11-7z"/>
                                     </svg>
                                 </button>
-                                <button onclick="openFolderById('${safeId}')" title="Klasörde Göster" class="p-3 rounded-xl bg-background-dark border border-border-dark text-slate-300 hover:text-primary hover:border-primary/50 transition-all flex items-center justify-center">
+                                <button onclick="openFolderById('${safeId}')" title="${t.btnOpenFolder}" class="p-3 rounded-xl bg-background-dark border border-border-dark text-slate-300 hover:text-primary hover:border-primary/50 transition-all flex items-center justify-center">
                                     <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
                                     </svg>
                                 </button>
-                                <button onclick="promptDeleteHistory('${safeId}')" title="Geçmişten Sil" class="p-3 rounded-xl bg-background-dark border border-border-dark text-slate-300 hover:text-red-400 hover:border-red-500/50 transition-all flex items-center justify-center">
+                                <button onclick="promptDeleteHistory('${safeId}')" title="${t.btnDelete}" class="p-3 rounded-xl bg-background-dark border border-border-dark text-slate-300 hover:text-red-400 hover:border-red-500/50 transition-all flex items-center justify-center">
                                     <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>
@@ -759,8 +902,9 @@
             const modal = document.getElementById("delete-modal");
             const titleEl = document.getElementById("delete-modal-title");
             const chkFile = document.getElementById("delete-file-checkbox");
+            const t = i18n[currentLang] || i18n.en;
             
-            titleEl.innerText = item ? item.title : "Bu öge";
+            titleEl.innerText = item ? item.title : t.unknownVideo;
             chkFile.checked = false;
 
             modal.classList.remove("hidden");
@@ -805,6 +949,33 @@
                 window.open("https://github.com/brsbrkctn", "_blank");
             }
         }
+
+        // Auto-detect system language or load stored preference on ready
+        async function initLanguage() {
+            const savedLang = localStorage.getItem("yt_downloader_lang");
+            if (savedLang) {
+                currentLang = savedLang;
+            } else if (window.pywebview && window.pywebview.api) {
+                try {
+                    const sysLang = await window.pywebview.api.get_system_language();
+                    currentLang = (sysLang === "tr") ? "tr" : "en";
+                } catch (e) {
+                    currentLang = "en";
+                }
+            } else {
+                const navLang = (navigator.language || "").toLowerCase();
+                currentLang = navLang.startsWith("tr") ? "tr" : "en";
+            }
+            applyLanguage();
+        }
+
+        window.addEventListener("pywebviewready", function() {
+            initLanguage();
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            initLanguage();
+        });
     </script>
 </body>
 </html>
