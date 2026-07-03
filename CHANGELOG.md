@@ -4,6 +4,13 @@ All notable changes to **YT Downloader** are documented in this file following [
 
 ---
 
+### 📌 v2.1.1 - *2026-07-03*
+- 🔊 **Universal Audio/Video Codec Compatibility**: Forced native H.264 video (`avc1`) & AAC audio encoding (`-c:a aac`) in MP4 containers so downloaded videos play audio and video natively out of the box in Windows Media Player and Movies & TV without requiring AV1 extensions or VLC.
+- 📋 **Robust 64-bit Windows Clipboard Reader**: Added explicit 64-bit `ctypes` types (`argtypes`/`restype`) and `tkinter` fallback for zero-failure paste button operation on all Windows 10/11 machines.
+- 🛡️ **Antivirus & SmartScreen Notes**: Added clarity and release instructions regarding unsigned executable warnings on Windows Defender & Avast DeepScreen.
+
+---
+
 ### 📌 v2.1.0 - *2026-07-03*
 - 🌐 **Persistent Internationalization (i18n)**: Automatic system language detection + persistent TR/EN language switcher saved in `%APPDATA%\YT_Downloader\config.json`.
 - ⚡ **Zero-Flicker & Zero-Deadlock Rendering**: Native `CreateWindowEx` screen centering on creation; instant zero-delay language application with `private_mode=False`.

@@ -38,6 +38,17 @@ def get_clipboard_text():
         user32 = ctypes.windll.user32
         kernel32 = ctypes.windll.kernel32
         
+        user32.OpenClipboard.argtypes = [ctypes.c_void_p]
+        user32.OpenClipboard.restype = ctypes.c_bool
+        user32.GetClipboardData.argtypes = [ctypes.c_uint]
+        user32.GetClipboardData.restype = ctypes.c_void_p
+        user32.CloseClipboard.argtypes = []
+        user32.CloseClipboard.restype = ctypes.c_bool
+        kernel32.GlobalLock.argtypes = [ctypes.c_void_p]
+        kernel32.GlobalLock.restype = ctypes.c_void_p
+        kernel32.GlobalUnlock.argtypes = [ctypes.c_void_p]
+        kernel32.GlobalUnlock.restype = ctypes.c_bool
+
         opened = False
         for _ in range(10):
             if user32.OpenClipboard(None):
@@ -45,23 +56,34 @@ def get_clipboard_text():
                 break
             time.sleep(0.01)
             
-        if not opened:
-            return ""
-
-        try:
-            handle = user32.GetClipboardData(CF_UNICODETEXT)
-            if not handle:
-                return ""
-            pointer = kernel32.GlobalLock(handle)
-            if not pointer:
-                return ""
-            text = ctypes.c_wchar_p(pointer).value
-            kernel32.GlobalUnlock(handle)
-            return text or ""
-        finally:
-            user32.CloseClipboard()
+        if opened:
+            try:
+                handle = user32.GetClipboardData(CF_UNICODETEXT)
+                if handle:
+                    pointer = kernel32.GlobalLock(handle)
+                    if pointer:
+                        text = ctypes.c_wchar_p(pointer).value
+                        kernel32.GlobalUnlock(handle)
+                        if text:
+                            return text
+            finally:
+                user32.CloseClipboard()
     except Exception:
-        return ""
+        pass
+
+    # Fallback to tkinter if C-API fails or returns empty
+    try:
+        import tkinter as tk
+        root = tk.Tk()
+        root.withdraw()
+        val = root.clipboard_get()
+        root.destroy()
+        if val:
+            return val
+    except Exception:
+        pass
+
+    return ""
 
 class YTDownloaderAPI:
     def __init__(self, window_holder):
@@ -210,7 +232,7 @@ def main():
         pos_x, pos_y = None, None
 
     create_args = {
-        "title": "YT Downloader v2.1.0",
+        "title": "YT Downloader v2.1.1",
         "url": file_url,
         "js_api": api,
         "width": 1040,

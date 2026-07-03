@@ -229,12 +229,15 @@ class YTDownloaderEngine:
             if quality and 'p' in quality:
                 height_val = quality.replace('p', '')
             ydl_opts.update({
-                'format': f'bestvideo[height<={height_val}]+bestaudio/best[height<={height_val}]/best',
+                'format': f'bestvideo[height<={height_val}][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[height<={height_val}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<={height_val}]+bestaudio/best[height<={height_val}]/best',
                 'merge_output_format': 'mp4',
                 'postprocessors': [{
                     'key': 'FFmpegVideoConvertor',
                     'preferedformat': 'mp4'
-                }]
+                }],
+                'postprocessor_args': {
+                    'ffmpeg': ['-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k']
+                }
             })
 
         try:
