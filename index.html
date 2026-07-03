@@ -47,7 +47,7 @@
         }
     </script>
 </head>
-<body class="bg-background-dark text-white min-h-screen flex flex-col select-none opacity-0 transition-opacity duration-150">
+<body id="app-body" style="display: none;" class="bg-background-dark text-white min-h-screen flex flex-col select-none">
 
     <!-- Top Navigation Bar -->
     <header class="border-b border-border-dark px-6 py-4 flex items-center justify-between bg-background-dark/90 backdrop-blur sticky top-0 z-40">
@@ -971,6 +971,15 @@
             }
         }
 
+        let isLangLoaded = false;
+
+        function showAppUI() {
+            const bodyEl = document.getElementById("app-body");
+            if (bodyEl) {
+                bodyEl.style.display = "";
+            }
+        }
+
         async function initLanguage() {
             let pref = localStorage.getItem("yt_downloader_lang");
             if (window.pywebview && window.pywebview.api && window.pywebview.api.get_language) {
@@ -981,10 +990,14 @@
             }
             if (pref === "tr" || pref === "en") {
                 currentLang = pref;
-                localStorage.setItem("yt_downloader_lang", currentLang);
+            } else {
+                const navLang = (navigator.language || "").toLowerCase();
+                currentLang = navLang.startsWith("tr") ? "tr" : "en";
             }
+            localStorage.setItem("yt_downloader_lang", currentLang);
             applyLanguage();
-            document.body.classList.remove("opacity-0");
+            showAppUI();
+            isLangLoaded = true;
         }
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -992,10 +1005,12 @@
             if (saved === "tr" || saved === "en") {
                 currentLang = saved;
                 applyLanguage();
+                showAppUI();
+                isLangLoaded = true;
             }
             setTimeout(() => {
-                document.body.classList.remove("opacity-0");
-            }, 50);
+                showAppUI();
+            }, 300);
         });
 
         window.addEventListener("pywebviewready", function() {

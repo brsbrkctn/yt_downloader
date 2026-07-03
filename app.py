@@ -225,7 +225,7 @@ def main():
     window = webview.create_window(**create_args)
     window_holder['window'] = window
 
-    webview.start(debug=False)
+    webview.start(debug=False, private_mode=False)
 
 if __name__ == "__main__":
     main()
