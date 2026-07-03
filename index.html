@@ -53,10 +53,10 @@
     <header class="border-b border-border-dark px-6 py-4 flex items-center justify-between bg-background-dark/90 backdrop-blur sticky top-0 z-40">
         <div class="flex items-center gap-3">
             <div class="size-9 bg-primary/20 text-primary rounded-xl flex items-center justify-center border border-primary/30">
-                <!-- SVG: download_for_offline (Perfect circle to prevent warping) -->
+                <!-- Unified circle down-arrow logo -->
                 <svg class="size-6 text-primary" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="9"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v8m-3-3l3 3 3-3"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v10m-4-4l4 4 4-4"/>
                 </svg>
             </div>
             <div class="flex flex-col">
@@ -73,12 +73,13 @@
                 </svg>
                 Ana Sayfa
             </button>
+            <!-- Changed text to "Geçmiş" -->
             <button id="nav-history" onclick="switchTab('history')" class="px-5 py-2 rounded-lg text-sm font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/40 flex items-center gap-2">
                 <!-- SVG: history -->
                 <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                İndirme Geçmişi
+                Geçmiş
             </button>
             <button onclick="openAboutModal()" class="px-4 py-2 rounded-lg text-sm font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/40 flex items-center gap-1.5">
                 <!-- SVG: info -->
@@ -115,7 +116,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                         </svg>
                     </div>
-                    <!-- Added focus:ring-0 focus:border-none focus:outline-none to fix white focus border -->
                     <input id="url-input" type="text" placeholder="https://www.youtube.com/watch?v=... veya https://youtu.be/..." 
                            class="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none text-white placeholder-slate-500 px-4 text-base font-medium"
                            oninput="toggleClearBtn()"
@@ -264,7 +264,8 @@
             <!-- Page Header & Spacing -->
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 pb-3 border-b border-border-dark/60">
                 <div>
-                    <h1 class="text-3xl font-black text-white">İndirme Geçmişim</h1>
+                    <!-- Changed text to "Geçmişim" -->
+                    <h1 class="text-3xl font-black text-white">Geçmişim</h1>
                 </div>
                 
                 <!-- Search & Filters (Exact Matching Height h-11 / 44px) -->
@@ -362,10 +363,10 @@
 
             <div class="flex items-center gap-4">
                 <div class="size-14 bg-primary/20 text-primary rounded-2xl flex items-center justify-center border border-primary/30 shrink-0">
-                    <!-- Clean unwarped SVG Logo matching header style -->
+                    <!-- Unified circle down-arrow logo -->
                     <svg class="size-8 text-primary" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="9"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v8m-3-3l3 3 3-3"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v10m-4-4l4 4 4-4"/>
                     </svg>
                 </div>
                 <div class="flex flex-col">
@@ -719,8 +720,9 @@
 
                             <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
                                 <button onclick="openFileById('${safeId}')" title="Dosyayı Aç" class="p-3 rounded-xl bg-background-dark border border-border-dark text-slate-300 hover:text-emerald-400 hover:border-emerald-500/50 transition-all flex items-center justify-center">
-                                    <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                                    <!-- Solid sharp play arrow svg with fill -->
+                                    <svg class="size-5" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M8 5v14l11-7z"/>
                                     </svg>
                                 </button>
                                 <button onclick="openFolderById('${safeId}')" title="Klasörde Göster" class="p-3 rounded-xl bg-background-dark border border-border-dark text-slate-300 hover:text-primary hover:border-primary/50 transition-all flex items-center justify-center">
