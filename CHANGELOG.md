@@ -4,6 +4,14 @@ All notable changes to **YT Downloader** are documented in this file following [
 
 ---
 
+### 📌 v2.0.2 - *2026-07-03*
+- 🎨 **Custom Brand Logos**: Integrated custom `icon.ico` for desktop window/taskbar and `icon2.ico` for in-app headers.
+- 📋 **Seamless Clipboard Paste**: Bypassed browser permission dialog prompt by forcing exclusive Windows C-API clipboard reads.
+- 📐 **Vector Icon Refinement**: Replaced history play button path with standard solid vector arrow shape.
+- 🏷️ **Tab Name Simplification**: Renamed "İndirme Geçmişi" navigation tab to "Geçmiş".
+
+---
+
 ### 📌 v2.0.1 - *2026-07-03*
 - 🎯 **Auto-Center Window**: Window automatically centers on launch (`window.center()`).
 - 📋 **Windows C-API Clipboard Reader**: 10-retry loop native Windows C-API (`ctypes.windll.user32`) clipboard implementation with `navigator.clipboard` fallback.
