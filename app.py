@@ -8,12 +8,13 @@ import webview
 from downloader import YTDownloaderEngine
 from history_manager import HistoryManager
 
-def get_app_dir():
-    if getattr(sys, 'frozen', False):
-        return os.path.dirname(sys.executable)
-    return os.path.dirname(os.path.abspath(__file__))
+def get_app_data_dir():
+    appdata = os.getenv("APPDATA") or os.path.expanduser("~")
+    target_dir = os.path.join(appdata, "YT_Downloader")
+    os.makedirs(target_dir, exist_ok=True)
+    return target_dir
 
-CONFIG_FILE = os.path.join(get_app_dir(), "config.json")
+CONFIG_FILE = os.path.join(get_app_data_dir(), "config.json")
 
 def load_config():
     if os.path.exists(CONFIG_FILE):
@@ -157,10 +158,11 @@ def main():
     HistoryManager.load_history(force_refresh=True)
     
     html_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "index.html"))
-    file_url = f"file:///{html_file.replace('\\', '/')}"
-    
     window_holder = {}
     api = YTDownloaderAPI(window_holder)
+
+    saved_lang = api.get_language()
+    file_url = f"file:///{html_file.replace('\\', '/')}?lang={saved_lang}"
 
     # Calculate centered position natively without using events.shown to avoid Win32 deadlock
     try:

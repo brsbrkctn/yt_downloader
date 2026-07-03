@@ -968,7 +968,22 @@
             }
         }
 
-        // Load language preference persistently from Python or localStorage ONLY when pywebview is ready
+        // Synchronous URL query parameter check for 0ms zero-flicker initial render
+        (function() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlLang = urlParams.get('lang');
+                if (urlLang === 'tr' || urlLang === 'en') {
+                    currentLang = urlLang;
+                } else {
+                    const saved = localStorage.getItem('yt_downloader_lang');
+                    if (saved === 'tr' || saved === 'en') {
+                        currentLang = saved;
+                    }
+                }
+            } catch (e) {}
+        })();
+
         async function initLanguage() {
             let pref = null;
             if (window.pywebview && window.pywebview.api && window.pywebview.api.get_language) {
@@ -976,28 +991,19 @@
                     pref = await window.pywebview.api.get_language();
                 } catch (e) {}
             }
-            if (!pref) {
-                pref = localStorage.getItem("yt_downloader_lang");
+            if (pref && (pref === "tr" || pref === "en")) {
+                currentLang = pref;
+                localStorage.setItem("yt_downloader_lang", currentLang);
+                applyLanguage();
             }
-            if (!pref) {
-                const navLang = (navigator.language || "").toLowerCase();
-                pref = navLang.startsWith("tr") ? "tr" : "en";
-            }
-            currentLang = (pref === "tr" || pref === "en") ? pref : "en";
-            applyLanguage();
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            applyLanguage();
+        });
 
         window.addEventListener("pywebviewready", function() {
             initLanguage();
-        });
-
-        // Fallback for standalone browser testing only if pywebview doesn't load
-        document.addEventListener("DOMContentLoaded", function() {
-            setTimeout(() => {
-                if (!window.pywebview) {
-                    initLanguage();
-                }
-            }, 300);
         });
     </script>
 </body>

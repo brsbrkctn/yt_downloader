@@ -6,9 +6,10 @@ import threading
 from datetime import datetime
 
 def get_app_dir():
-    if getattr(sys, 'frozen', False):
-        return os.path.dirname(sys.executable)
-    return os.path.dirname(os.path.abspath(__file__))
+    appdata = os.getenv("APPDATA") or os.path.expanduser("~")
+    target_dir = os.path.join(appdata, "YT_Downloader")
+    os.makedirs(target_dir, exist_ok=True)
+    return target_dir
 
 HISTORY_FILE = os.path.join(get_app_dir(), "history.json")
 
