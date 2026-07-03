@@ -52,12 +52,9 @@
     <!-- Top Navigation Bar -->
     <header class="border-b border-border-dark px-6 py-4 flex items-center justify-between bg-background-dark/90 backdrop-blur sticky top-0 z-40">
         <div class="flex items-center gap-3">
-            <div class="size-9 bg-primary/20 text-primary rounded-xl flex items-center justify-center border border-primary/30">
-                <!-- Unified circle down-arrow logo -->
-                <svg class="size-6 text-primary" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="9"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v10m-4-4l4 4 4-4"/>
-                </svg>
+            <div class="size-9 bg-primary/20 rounded-xl flex items-center justify-center border border-primary/30 overflow-hidden shrink-0">
+                <!-- Unified internal logo image (icon2.ico) -->
+                <img src="icon2.ico" class="size-6 object-contain" alt="Logo"/>
             </div>
             <div class="flex flex-col">
                 <span class="text-xl font-bold tracking-tight text-white leading-none">YT Downloader</span>
@@ -73,7 +70,6 @@
                 </svg>
                 Ana Sayfa
             </button>
-            <!-- Changed text to "Geçmiş" -->
             <button id="nav-history" onclick="switchTab('history')" class="px-5 py-2 rounded-lg text-sm font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/40 flex items-center gap-2">
                 <!-- SVG: history -->
                 <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -258,17 +254,16 @@
 
         </section>
 
-        <!-- TAB 2: İNDİRME GEÇMİŞİ (HISTORY) -->
+        <!-- TAB 2: GEÇMİŞ (HISTORY) -->
         <section id="tab-history" class="hidden flex-col gap-6 py-4">
             
             <!-- Page Header & Spacing -->
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 pb-3 border-b border-border-dark/60">
                 <div>
-                    <!-- Changed text to "Geçmişim" -->
                     <h1 class="text-3xl font-black text-white">Geçmişim</h1>
                 </div>
                 
-                <!-- Search & Filters (Exact Matching Height h-11 / 44px) -->
+                <!-- Search & Filters -->
                 <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                     <div class="flex items-center h-11 w-full sm:w-64 relative">
                         <div class="absolute left-3.5 top-0 bottom-0 flex items-center pointer-events-none text-slate-400">
@@ -362,12 +357,9 @@
             </button>
 
             <div class="flex items-center gap-4">
-                <div class="size-14 bg-primary/20 text-primary rounded-2xl flex items-center justify-center border border-primary/30 shrink-0">
-                    <!-- Unified circle down-arrow logo -->
-                    <svg class="size-8 text-primary" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="9"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v10m-4-4l4 4 4-4"/>
-                    </svg>
+                <div class="size-14 bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/30 overflow-hidden shrink-0">
+                    <!-- Unified internal logo image (icon2.ico) -->
+                    <img src="icon2.ico" class="size-10 object-contain" alt="Logo"/>
                 </div>
                 <div class="flex flex-col">
                     <h2 class="text-2xl font-black text-white">YT Downloader</h2>
@@ -376,7 +368,7 @@
             </div>
 
             <p class="text-sm text-slate-300 leading-relaxed">
-                Yüksek hızlı YouTube MP4 ve MP3 dönüştürücü. Akıllı format birleştirme, otomatik albüm kapağı işleme ve dinamik klasör tespiti ile güçlendirilmiştir.
+                Yüksek hızlı YouTube MP4 ve MP3 dönüştürücü. Akıllı format birleştirme, otomatik albüm kapağı işleme ve dinamik klasör tespiti ile güçlendiritmiştir.
             </p>
 
             <div class="bg-background-dark p-4 rounded-xl border border-border-dark flex flex-col gap-3">
@@ -475,10 +467,10 @@
         async function pasteFromClipboard() {
             try {
                 let text = "";
+                // If running in pywebview, use Python API ONLY to avoid security popup warnings
                 if (window.pywebview && window.pywebview.api) {
                     text = await window.pywebview.api.read_clipboard();
-                }
-                if (!text && navigator.clipboard) {
+                } else if (navigator.clipboard) {
                     text = await navigator.clipboard.readText();
                 }
                 if (text) {
