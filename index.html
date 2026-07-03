@@ -809,7 +809,8 @@
         async function loadHistory() {
             if (window.pywebview && window.pywebview.api && window.pywebview.api.get_history) {
                 try {
-                    const res = await window.pywebview.api.get_history();
+                    const raw = await window.pywebview.api.get_history();
+                    const res = (typeof raw === "string") ? JSON.parse(raw) : raw;
                     if (Array.isArray(res)) {
                         historyData = res;
                     }
@@ -944,7 +945,15 @@
                 const idToDelete = pendingDeleteId;
                 const deleteFile = document.getElementById("delete-file-checkbox").checked;
                 closeDeleteModal();
-                historyData = await window.pywebview.api.delete_history_item(idToDelete, deleteFile);
+                try {
+                    const raw = await window.pywebview.api.delete_history_item(idToDelete, deleteFile);
+                    const res = (typeof raw === "string") ? JSON.parse(raw) : raw;
+                    if (Array.isArray(res)) {
+                        historyData = res;
+                    }
+                } catch(e) {
+                    console.error("Delete error:", e);
+                }
                 renderHistory();
             }
         }

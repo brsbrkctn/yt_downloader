@@ -19,21 +19,35 @@ def migrate_legacy_history():
     Automatically migrates history.json from old executable/script paths
     to %APPDATA%/YT_Downloader/history.json so user history is never lost.
     """
-    if os.path.exists(HISTORY_FILE) and os.path.getsize(HISTORY_FILE) > 5:
-        return  # APPDATA history already exists and is non-empty
-
     candidate_paths = []
     if getattr(sys, 'frozen', False):
         candidate_paths.append(os.path.join(os.path.dirname(sys.executable), "history.json"))
     candidate_paths.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "history.json"))
     candidate_paths.append(os.path.join(os.getcwd(), "history.json"))
 
+    current_data = []
+    if os.path.exists(HISTORY_FILE):
+        try:
+            with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+                current_data = json.load(f)
+                if not isinstance(current_data, list):
+                    current_data = []
+        except Exception:
+            current_data = []
+
+    if len(current_data) > 0:
+        return  # APPDATA history already populated with items
+
     for old_path in candidate_paths:
-        if os.path.exists(old_path) and os.path.getsize(old_path) > 5 and old_path != HISTORY_FILE:
+        if os.path.exists(old_path) and old_path != HISTORY_FILE:
             try:
-                shutil.copy2(old_path, HISTORY_FILE)
-                print(f"Migrated history from {old_path} to {HISTORY_FILE}")
-                break
+                with open(old_path, "r", encoding="utf-8") as of:
+                    old_items = json.load(of)
+                    if isinstance(old_items, list) and len(old_items) > 0:
+                        with open(HISTORY_FILE, "w", encoding="utf-8") as wf:
+                            json.dump(old_items, wf, ensure_ascii=False, indent=2)
+                        print(f"Migrated {len(old_items)} items from {old_path} to {HISTORY_FILE}")
+                        break
             except Exception as e:
                 print(f"Error migrating history from {old_path}: {e}")
 
