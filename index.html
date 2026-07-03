@@ -664,7 +664,7 @@
             videoCard.classList.remove("flex");
 
             try {
-                if (window.pywebview && window.pywebview.api) {
+                if (window.pywebview && window.pywebview.api && window.pywebview.api.fetch_info) {
                     const res = await window.pywebview.api.fetch_info(url);
                     if (res && res.success) {
                         displayVideoCard(res.data);

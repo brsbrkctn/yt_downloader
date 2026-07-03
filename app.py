@@ -68,20 +68,8 @@ def get_clipboard_text():
                             return text
             finally:
                 user32.CloseClipboard()
-    except Exception:
-        pass
-
-    # Fallback to tkinter if C-API fails or returns empty
-    try:
-        import tkinter as tk
-        root = tk.Tk()
-        root.withdraw()
-        val = root.clipboard_get()
-        root.destroy()
-        if val:
-            return val
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"Clipboard error: {e}")
 
     return ""
 
