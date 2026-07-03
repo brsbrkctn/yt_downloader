@@ -110,7 +110,7 @@ def main():
     api = YTDownloaderAPI(window_holder)
 
     window = webview.create_window(
-        title="YT Downloader",
+        title="YT Downloader v2.0.2",
         url=file_url,
         js_api=api,
         width=1040,
