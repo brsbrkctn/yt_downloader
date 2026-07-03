@@ -4,6 +4,13 @@ All notable changes to **YT Downloader** are documented in this file following [
 
 ---
 
+### 📌 v2.1.0 - *2026-07-03*
+- 🌐 **Persistent Internationalization (i18n)**: Added automatic system language detection and persistent TR/EN language switcher via `config.json`.
+- ⚡ **Deadlock-Free Native Centering**: Replaced `events.shown` IPC window positioning with native `CreateWindowEx` screen coordinate calculation.
+- 📐 **Two-Line Hero Title**: Redesigned main hero header into clean two-line layout ("En Hızlı / YouTube Dönüştürücü").
+
+---
+
 ### 📌 v2.0.2 - *2026-07-03*
 - 🎨 **Custom Brand Logos**: Integrated custom `icon.ico` for desktop window/taskbar and `icon2.ico` for in-app headers.
 - 📋 **Seamless Clipboard Paste**: Bypassed browser permission dialog prompt by forcing exclusive Windows C-API clipboard reads.

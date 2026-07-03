@@ -174,7 +174,7 @@ def main():
         pos_x, pos_y = None, None
 
     create_args = {
-        "title": "YT Downloader",
+        "title": "YT Downloader v2.1.0",
         "url": file_url,
         "js_api": api,
         "width": 1040,
