@@ -5,9 +5,10 @@ All notable changes to **YT Downloader** are documented in this file following [
 ---
 
 ### 📌 v2.1.0 - *2026-07-03*
-- 🌐 **Persistent Internationalization (i18n)**: Added automatic system language detection and persistent TR/EN language switcher via `config.json`.
-- ⚡ **Deadlock-Free Native Centering**: Replaced `events.shown` IPC window positioning with native `CreateWindowEx` screen coordinate calculation.
-- 📐 **Two-Line Hero Title**: Redesigned main hero header into clean two-line layout ("En Hızlı / YouTube Dönüştürücü").
+- 🌐 **Persistent Internationalization (i18n)**: Automatic system language detection + persistent TR/EN language switcher saved in `%APPDATA%\YT_Downloader\config.json`.
+- ⚡ **Zero-Flicker & Zero-Deadlock Rendering**: Native `CreateWindowEx` screen centering on creation; instant zero-delay language application with `private_mode=False`.
+- 📜 **Robust History Engine**: JSON string IPC serialization ensuring 100% native JavaScript Array parsing; automatic migration of legacy history files to AppData.
+- 📐 **Two-Line Hero Title**: Redesigned main hero header into a clean two-line layout.
 
 ---
 
