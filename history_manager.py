@@ -1,17 +1,41 @@
 import os
 import sys
 import json
+import shutil
 import subprocess
 import threading
 from datetime import datetime
 
-def get_app_dir():
+def get_app_data_dir():
     appdata = os.getenv("APPDATA") or os.path.expanduser("~")
     target_dir = os.path.join(appdata, "YT_Downloader")
     os.makedirs(target_dir, exist_ok=True)
     return target_dir
 
-HISTORY_FILE = os.path.join(get_app_dir(), "history.json")
+HISTORY_FILE = os.path.join(get_app_data_dir(), "history.json")
+
+def migrate_legacy_history():
+    """
+    Automatically migrates history.json from old executable/script paths
+    to %APPDATA%/YT_Downloader/history.json so user history is never lost.
+    """
+    if os.path.exists(HISTORY_FILE) and os.path.getsize(HISTORY_FILE) > 5:
+        return  # APPDATA history already exists and is non-empty
+
+    candidate_paths = []
+    if getattr(sys, 'frozen', False):
+        candidate_paths.append(os.path.join(os.path.dirname(sys.executable), "history.json"))
+    candidate_paths.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "history.json"))
+    candidate_paths.append(os.path.join(os.getcwd(), "history.json"))
+
+    for old_path in candidate_paths:
+        if os.path.exists(old_path) and os.path.getsize(old_path) > 5 and old_path != HISTORY_FILE:
+            try:
+                shutil.copy2(old_path, HISTORY_FILE)
+                print(f"Migrated history from {old_path} to {HISTORY_FILE}")
+                break
+            except Exception as e:
+                print(f"Error migrating history from {old_path}: {e}")
 
 def get_user_downloads_dir():
     try:
@@ -35,8 +59,16 @@ def sanitize_item(item):
     """
     Guarantees returning pure primitive Python types (str, bool)
     to prevent PyWebView CLR/SyncRoot serialization recursion.
+    Fast path check without blocking network drives.
     """
     path = str(item.get("path", ""))
+    file_exists = False
+    if path:
+        try:
+            file_exists = os.path.isfile(path)
+        except Exception:
+            file_exists = False
+
     return {
         "id": str(item.get("id", "")),
         "title": str(item.get("title", "")),
@@ -47,7 +79,7 @@ def sanitize_item(item):
         "thumbnail": str(item.get("thumbnail", "")),
         "path": path,
         "duration": str(item.get("duration", "")),
-        "exists": bool(os.path.exists(path)) if path else False
+        "exists": file_exists
     }
 
 class HistoryManager:
@@ -60,6 +92,9 @@ class HistoryManager:
             if HistoryManager._cached_history is not None and not force_refresh:
                 return [dict(x) for x in HistoryManager._cached_history]
 
+            # Attempt migration if needed
+            migrate_legacy_history()
+
             if not os.path.exists(HISTORY_FILE):
                 HistoryManager._cached_history = []
                 return []
@@ -68,22 +103,24 @@ class HistoryManager:
                 with open(HISTORY_FILE, "r", encoding="utf-8") as f:
                     raw_history = json.load(f)
                     
-                if not raw_history:
+                if not raw_history or not isinstance(raw_history, list):
                     HistoryManager._cached_history = []
                     return []
 
-                dirty = False
                 cleaned_list = []
+                dirty = False
                 for idx, raw in enumerate(raw_history):
+                    if not isinstance(raw, dict):
+                        continue
                     if "id" not in raw or not raw["id"]:
-                        raw["id"] = f"legacy_{idx}_{int(datetime.now().timestamp())}"
+                        raw["id"] = f"item_{idx}_{int(datetime.now().timestamp())}"
                         dirty = True
                     cleaned_list.append(sanitize_item(raw))
 
                 if dirty:
                     try:
                         with open(HISTORY_FILE, "w", encoding="utf-8") as wf:
-                            json.dump(cleaned_list, wf, ensure_ascii=False, indent=4)
+                            json.dump(cleaned_list, wf, ensure_ascii=False, indent=2)
                     except Exception:
                         pass
 
@@ -93,6 +130,16 @@ class HistoryManager:
                 print(f"Error loading history: {e}")
                 HistoryManager._cached_history = []
                 return []
+
+    @staticmethod
+    def get_history():
+        """
+        Ultra-fast non-blocking history accessor for PyWebView IPC.
+        """
+        if HistoryManager._cached_history is None:
+            return HistoryManager.load_history(force_refresh=True)
+        with HistoryManager._lock:
+            return [dict(x) for x in HistoryManager._cached_history]
 
     @staticmethod
     def add_to_history(item):
@@ -110,7 +157,7 @@ class HistoryManager:
         try:
             temp_file = HISTORY_FILE + ".tmp"
             with open(temp_file, "w", encoding="utf-8") as f:
-                json.dump(history, f, ensure_ascii=False, indent=4)
+                json.dump(history, f, ensure_ascii=False, indent=2)
             os.replace(temp_file, HISTORY_FILE)
         except Exception as e:
             print(f"Error saving history: {e}")
@@ -142,7 +189,7 @@ class HistoryManager:
         try:
             temp_file = HISTORY_FILE + ".tmp"
             with open(temp_file, "w", encoding="utf-8") as f:
-                json.dump(new_history, f, ensure_ascii=False, indent=4)
+                json.dump(new_history, f, ensure_ascii=False, indent=2)
             os.replace(temp_file, HISTORY_FILE)
         except Exception as e:
             print(f"Error updating history after deletion: {e}")

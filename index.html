@@ -809,12 +809,15 @@
         async function loadHistory() {
             if (window.pywebview && window.pywebview.api && window.pywebview.api.get_history) {
                 try {
-                    historyData = await window.pywebview.api.get_history();
-                    renderHistory();
+                    const res = await window.pywebview.api.get_history();
+                    if (Array.isArray(res)) {
+                        historyData = res;
+                    }
                 } catch(e) {
                     console.error("History load error:", e);
                 }
             }
+            renderHistory();
         }
 
         function setFilter(filter) {
@@ -997,6 +1000,7 @@
 
         window.addEventListener("pywebviewready", function() {
             initLanguage();
+            loadHistory();
         });
     </script>
 </body>

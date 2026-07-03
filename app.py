@@ -97,17 +97,23 @@ class YTDownloaderAPI:
         return "en"
 
     def get_language(self):
-        cfg = load_config()
-        if "lang" in cfg and cfg["lang"] in ["tr", "en"]:
-            return cfg["lang"]
+        try:
+            cfg = load_config()
+            if "lang" in cfg and cfg["lang"] in ["tr", "en"]:
+                return cfg["lang"]
+        except Exception:
+            pass
         return self.get_system_language()
 
     def save_language(self, lang):
         if lang in ["tr", "en"]:
-            cfg = load_config()
-            cfg["lang"] = lang
-            save_config(cfg)
-            return True
+            try:
+                cfg = load_config()
+                cfg["lang"] = lang
+                save_config(cfg)
+                return True
+            except Exception:
+                pass
         return False
 
     def fetch_info(self, url):
@@ -120,48 +126,77 @@ class YTDownloaderAPI:
     def start_download(self, url, format_type, quality):
         def progress_callback(progress_data):
             if self.window:
-                progress_json = json.dumps(progress_data)
-                js_code = f"if (window.updateProgress) window.updateProgress({progress_json});"
-                self.window.evaluate_js(js_code)
+                try:
+                    progress_json = json.dumps(progress_data)
+                    js_code = f"if (window.updateProgress) window.updateProgress({progress_json});"
+                    self.window.evaluate_js(js_code)
+                except Exception:
+                    pass
 
         def worker():
             try:
                 result_item = self.engine.download(url, format_type, quality, progress_callback=progress_callback)
                 if self.window:
-                    js_code = f"if (window.onDownloadComplete) window.onDownloadComplete({json.dumps(result_item)});"
-                    self.window.evaluate_js(js_code)
+                    try:
+                        js_code = f"if (window.onDownloadComplete) window.onDownloadComplete({json.dumps(result_item)});"
+                        self.window.evaluate_js(js_code)
+                    except Exception:
+                        pass
             except Exception as e:
                 error_msg = str(e)
                 if self.window:
-                    err_payload = {"status": "error", "percent": 0, "text": f"Hata: {error_msg}"}
-                    self.window.evaluate_js(f"if (window.updateProgress) window.updateProgress({json.dumps(err_payload)});" )
+                    try:
+                        err_payload = {"status": "error", "percent": 0, "text": f"Hata: {error_msg}"}
+                        self.window.evaluate_js(f"if (window.updateProgress) window.updateProgress({json.dumps(err_payload)});" )
+                    except Exception:
+                        pass
 
         threading.Thread(target=worker, daemon=True).start()
         return {"success": True}
 
     def get_history(self):
-        return HistoryManager.load_history()
+        try:
+            return HistoryManager.get_history()
+        except Exception as e:
+            print(f"API get_history error: {e}")
+            return []
 
     def delete_history_item(self, item_id, delete_file=False):
-        return HistoryManager.delete_item(item_id, delete_file)
+        try:
+            return HistoryManager.delete_item(item_id, delete_file)
+        except Exception as e:
+            print(f"API delete_history_item error: {e}")
+            return []
 
     def open_file(self, path):
-        return HistoryManager.open_file(path)
+        try:
+            return HistoryManager.open_file(path)
+        except Exception as e:
+            return {"success": False, "error": str(e)}
 
     def open_folder(self, path):
-        return HistoryManager.open_folder(path)
+        try:
+            return HistoryManager.open_folder(path)
+        except Exception as e:
+            return {"success": False, "error": str(e)}
 
     def read_clipboard(self):
-        return get_clipboard_text()
+        try:
+            return get_clipboard_text()
+        except Exception:
+            return ""
 
 def main():
-    HistoryManager.load_history(force_refresh=True)
+    try:
+        HistoryManager.load_history(force_refresh=True)
+    except Exception as e:
+        print(f"Startup history load error: {e}")
     
     html_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "index.html"))
+    file_url = f"file:///{html_file.replace('\\', '/')}"
+
     window_holder = {}
     api = YTDownloaderAPI(window_holder)
-
-    file_url = f"file:///{html_file.replace('\\', '/')}"
 
     # Calculate centered position natively without using events.shown to avoid Win32 deadlock
     try:
