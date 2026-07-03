@@ -47,7 +47,7 @@
         }
     </script>
 </head>
-<body class="bg-background-dark text-white min-h-screen flex flex-col select-none">
+<body class="bg-background-dark text-white min-h-screen flex flex-col select-none opacity-0 transition-opacity duration-150">
 
     <!-- Top Navigation Bar -->
     <header class="border-b border-border-dark px-6 py-4 flex items-center justify-between bg-background-dark/90 backdrop-blur sticky top-0 z-40">
@@ -968,38 +968,31 @@
             }
         }
 
-        // Synchronous URL query parameter check for 0ms zero-flicker initial render
-        (function() {
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                const urlLang = urlParams.get('lang');
-                if (urlLang === 'tr' || urlLang === 'en') {
-                    currentLang = urlLang;
-                } else {
-                    const saved = localStorage.getItem('yt_downloader_lang');
-                    if (saved === 'tr' || saved === 'en') {
-                        currentLang = saved;
-                    }
-                }
-            } catch (e) {}
-        })();
-
         async function initLanguage() {
-            let pref = null;
+            let pref = localStorage.getItem("yt_downloader_lang");
             if (window.pywebview && window.pywebview.api && window.pywebview.api.get_language) {
                 try {
-                    pref = await window.pywebview.api.get_language();
+                    const pyPref = await window.pywebview.api.get_language();
+                    if (pyPref) pref = pyPref;
                 } catch (e) {}
             }
-            if (pref && (pref === "tr" || pref === "en")) {
+            if (pref === "tr" || pref === "en") {
                 currentLang = pref;
                 localStorage.setItem("yt_downloader_lang", currentLang);
-                applyLanguage();
             }
+            applyLanguage();
+            document.body.classList.remove("opacity-0");
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            applyLanguage();
+            const saved = localStorage.getItem("yt_downloader_lang");
+            if (saved === "tr" || saved === "en") {
+                currentLang = saved;
+                applyLanguage();
+            }
+            setTimeout(() => {
+                document.body.classList.remove("opacity-0");
+            }, 50);
         });
 
         window.addEventListener("pywebviewready", function() {

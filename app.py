@@ -161,8 +161,7 @@ def main():
     window_holder = {}
     api = YTDownloaderAPI(window_holder)
 
-    saved_lang = api.get_language()
-    file_url = f"file:///{html_file.replace('\\', '/')}?lang={saved_lang}"
+    file_url = f"file:///{html_file.replace('\\', '/')}"
 
     # Calculate centered position natively without using events.shown to avoid Win32 deadlock
     try:
