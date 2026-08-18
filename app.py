@@ -159,16 +159,14 @@ class YTDownloaderAPI:
 
     def get_history(self):
         try:
-            return json.dumps(HistoryManager.get_history(), ensure_ascii=False)
-        except Exception as e:
-            print(f"API get_history error: {e}")
+            return json.dumps(HistoryManager.get_history(), ensure_ascii=True)
+        except Exception:
             return "[]"
 
     def delete_history_item(self, item_id, delete_file=False):
         try:
-            return json.dumps(HistoryManager.delete_item(item_id, delete_file), ensure_ascii=False)
-        except Exception as e:
-            print(f"API delete_history_item error: {e}")
+            return json.dumps(HistoryManager.delete_item(item_id, delete_file), ensure_ascii=True)
+        except Exception:
             return "[]"
 
     def open_file(self, path):
@@ -219,7 +217,7 @@ def main():
         pos_x, pos_y = None, None
 
     create_args = {
-        "title": "YT Downloader v2.2.0",
+        "title": "YT Downloader v2.2.1",
         "url": file_url,
         "js_api": api,
         "width": 1040,

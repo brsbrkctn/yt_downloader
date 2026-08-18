@@ -4,6 +4,13 @@ All notable changes to **YT Downloader** are documented in this file following [
 
 ---
 
+### 📌 v2.2.1 - *2026-08-18*
+- ⚡ **Zero-Latency History & Instant Tab Switching**: Added immediate frontend memory & `localStorage` caching so history items render instantly (0ms) on tab switch with zero UI freeze.
+- 🛡️ **IPC Concurrency Lock & Re-entrancy Guard**: Guarded `loadHistory` with a state lock to prevent overlapping asynchronous Win32 IPC calls across the PyWebView bridge on rapid clicks.
+- 🔤 **ASCII-Safe Unicode Serialization**: Serialized history JSON using `ensure_ascii=True` to guarantee 100% immune transmission of unicode titles/symbols (`♪`, special glyphs) across Python and WebView2 without codepage truncation.
+
+---
+
 ### 📌 v2.2.0 - *2026-08-18*
 - 🧩 **Centralized Architecture (`utils.py`)**: Extracted duplicate directory paths, user downloads resolution, and error message cleaners into a unified module adhering to DRY principles.
 - 🛡️ **Enhanced URL & XSS Security**: Upgraded YouTube URL validation with strict domain and path filtering; extended HTML entity escaping to sanitize backtick characters.

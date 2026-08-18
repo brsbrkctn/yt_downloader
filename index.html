@@ -64,7 +64,7 @@
             </div>
             <div class="flex flex-col">
                 <span class="text-xl font-bold tracking-tight text-white leading-none">YT Downloader</span>
-                <span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase mt-0.5">v2.2.0</span>
+                <span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase mt-0.5">v2.2.1</span>
             </div>
         </div>
 
@@ -361,7 +361,7 @@
                 </div>
                 <div class="flex flex-col">
                     <h2 class="text-2xl font-black text-white">YT Downloader</h2>
-                    <span class="text-xs text-primary font-bold">v2.2.0</span>
+                    <span class="text-xs text-primary font-bold">v2.2.1</span>
                 </div>
             </div>
 
@@ -618,10 +618,16 @@
                 historyTab.classList.remove("hidden");
                 btnHistory.className = "px-5 py-2 rounded-lg text-sm font-bold transition-all bg-primary text-white shadow-lg shadow-primary/20 flex items-center gap-2";
                 btnHome.className = "px-5 py-2 rounded-lg text-sm font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/40 flex items-center gap-2";
-                // Defer history loading slightly to prevent IPC thread deadlock on quick tab clicks
-                setTimeout(() => {
-                    loadHistory();
-                }, 10);
+                
+                // Immediately render existing cached history (0ms latency, zero freezing!)
+                renderHistory();
+
+                // Non-blocking background sync from backend
+                if (window.pywebview && window.pywebview.api) {
+                    setTimeout(() => {
+                        loadHistory();
+                    }, 50);
+                }
             }
         }
 
@@ -800,6 +806,9 @@
                 text: t.downloadCompleted,
                 path: item.path
             });
+            setTimeout(() => {
+                loadHistory();
+            }, 100);
         }
 
         function openDownloadedFile() {
@@ -814,16 +823,24 @@
             }
         }
 
+        let isHistoryLoading = false;
         async function loadHistory() {
+            if (isHistoryLoading) return;
             if (window.pywebview && window.pywebview.api && window.pywebview.api.get_history) {
+                isHistoryLoading = true;
                 try {
                     const raw = await window.pywebview.api.get_history();
                     const res = (typeof raw === "string") ? JSON.parse(raw) : raw;
                     if (Array.isArray(res)) {
                         historyData = res;
+                        try {
+                            localStorage.setItem("yt_downloader_history_cache", JSON.stringify(res));
+                        } catch(e) {}
                     }
                 } catch(e) {
                     console.error("History load error:", e);
+                } finally {
+                    isHistoryLoading = false;
                 }
             }
             renderHistory();
@@ -968,6 +985,9 @@
                     const res = (typeof raw === "string") ? JSON.parse(raw) : raw;
                     if (Array.isArray(res)) {
                         historyData = res;
+                        try {
+                            localStorage.setItem("yt_downloader_history_cache", JSON.stringify(res));
+                        } catch(e) {}
                     }
                 } catch(e) {
                     console.error("Delete error:", e);
@@ -1038,6 +1058,15 @@
                 showAppUI();
                 isLangLoaded = true;
             }
+            try {
+                const cachedHist = localStorage.getItem("yt_downloader_history_cache");
+                if (cachedHist) {
+                    const parsed = JSON.parse(cachedHist);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        historyData = parsed;
+                    }
+                }
+            } catch(e) {}
             setTimeout(() => {
                 showAppUI();
             }, 300);

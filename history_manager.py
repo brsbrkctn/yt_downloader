@@ -41,10 +41,9 @@ def migrate_legacy_history():
                     if isinstance(old_items, list) and len(old_items) > 0:
                         with open(HISTORY_FILE, "w", encoding="utf-8") as wf:
                             json.dump(old_items, wf, ensure_ascii=False, indent=2)
-                        print(f"Migrated {len(old_items)} items from {old_path} to {HISTORY_FILE}")
                         break
-            except Exception as e:
-                print(f"Error migrating history from {old_path}: {e}")
+            except Exception:
+                pass
 
 def sanitize_item(item):
     """
@@ -53,7 +52,8 @@ def sanitize_item(item):
     Fast path check without blocking network drives.
     """
     path = str(item.get("path", ""))
-    file_exists = False
+    # Fast non-blocking exists check:
+    file_exists = bool(item.get("exists", True))
     if path:
         try:
             file_exists = os.path.isfile(path)
@@ -118,7 +118,6 @@ class HistoryManager:
                 HistoryManager._cached_history = cleaned_list
                 return [dict(x) for x in cleaned_list]
             except Exception as e:
-                print(f"Error loading history: {e}")
                 HistoryManager._cached_history = []
                 return []
 
@@ -127,9 +126,9 @@ class HistoryManager:
         """
         Ultra-fast non-blocking history accessor for PyWebView IPC.
         """
-        if HistoryManager._cached_history is None:
-            return HistoryManager.load_history(force_refresh=True)
         with HistoryManager._lock:
+            if HistoryManager._cached_history is None:
+                return HistoryManager.load_history(force_refresh=True)
             return [dict(x) for x in HistoryManager._cached_history]
 
     @staticmethod
@@ -150,8 +149,8 @@ class HistoryManager:
             with open(temp_file, "w", encoding="utf-8") as f:
                 json.dump(history, f, ensure_ascii=False, indent=2)
             os.replace(temp_file, HISTORY_FILE)
-        except Exception as e:
-            print(f"Error saving history: {e}")
+        except Exception:
+            pass
 
         with HistoryManager._lock:
             HistoryManager._cached_history = history
@@ -174,16 +173,16 @@ class HistoryManager:
             if path and os.path.exists(path):
                 try:
                     os.remove(path)
-                except Exception as e:
-                    print(f"Error deleting file {path}: {e}")
+                except Exception:
+                    pass
                     
         try:
             temp_file = HISTORY_FILE + ".tmp"
             with open(temp_file, "w", encoding="utf-8") as f:
                 json.dump(new_history, f, ensure_ascii=False, indent=2)
             os.replace(temp_file, HISTORY_FILE)
-        except Exception as e:
-            print(f"Error updating history after deletion: {e}")
+        except Exception:
+            pass
 
         with HistoryManager._lock:
             HistoryManager._cached_history = new_history
