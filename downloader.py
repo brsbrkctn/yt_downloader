@@ -1,4 +1,5 @@
 import os
+import re
 import time
 import requests
 import imageio_ffmpeg
@@ -36,6 +37,8 @@ class YTDownloaderEngine:
         url = url.strip()
         if not url.startswith("http://") and not url.startswith("https://"):
             url = "https://" + url
+        # Normalize music.youtube.com to standard www.youtube.com for reliable client API extraction
+        url = re.sub(r'https?://music\.youtube\.com/', 'https://www.youtube.com/', url, flags=re.IGNORECASE)
         return url
 
     def fetch_info(self, url):
@@ -54,6 +57,15 @@ class YTDownloaderEngine:
             'ffmpeg_location': self.ffmpeg_path,
             'nocheckcertificate': True,
             'noplaylist': True,
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['android', 'web'],
+                }
+            },
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept-Language': 'en-US,en;q=0.9',
+            }
         }
         
         try:
@@ -159,6 +171,15 @@ class YTDownloaderEngine:
             'nocheckcertificate': True,
             'noplaylist': True,
             'concurrent_fragment_downloads': 4,
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['android', 'web'],
+                }
+            },
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept-Language': 'en-US,en;q=0.9',
+            }
         }
 
         bitrate = "192"
@@ -186,7 +207,6 @@ class YTDownloaderEngine:
                 'merge_output_format': 'mp4',
                 'postprocessors': [{
                     'key': 'FFmpegVideoConvertor',
-                    'preferredformat': 'mp4',
                     'preferedformat': 'mp4'
                 }],
                 'postprocessor_args': {
@@ -221,8 +241,8 @@ class YTDownloaderEngine:
         if format_type == "MP3" and HAS_MUTAGEN and os.path.exists(final_path):
             try:
                 self._embed_mp3_tags(final_path, info)
-            except Exception as e:
-                print(f"Metadata embedding error: {e}")
+            except Exception:
+                pass
 
         if progress_callback:
             progress_callback({
@@ -283,7 +303,7 @@ class YTDownloaderEngine:
                         desc='Cover',
                         data=jpeg_bytes
                     ))
-            except Exception as e:
-                print(f"Failed to fetch thumbnail for audio tag: {e}")
+            except Exception:
+                pass
 
         audio.save()

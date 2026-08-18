@@ -4,6 +4,12 @@ All notable changes to **YT Downloader** are documented in this file following [
 
 ---
 
+### 📌 v2.2.2 - *2026-08-18*
+- 🔧 **FFmpeg Video Convertor Keyword Fix**: Fixed `FFmpegVideoConvertorPP` keyword parameter to exact yt-dlp internal signature (`preferedformat`), eliminating `unexpected keyword argument 'preferredformat'` on MP4 downloads.
+- 🎵 **YouTube Music & Android Client 403 Bypass**: Added automatic `music.youtube.com` normalization and multi-client player extractor arguments (`android`, `web`), permanently resolving `HTTP Error 403: Forbidden` across YouTube Music and restricted audio/video streams.
+
+---
+
 ### 📌 v2.2.1 - *2026-08-18*
 - ⚡ **Zero-Latency History & Instant Tab Switching**: Added immediate frontend memory & `localStorage` caching so history items render instantly (0ms) on tab switch with zero UI freeze.
 - 🛡️ **IPC Concurrency Lock & Re-entrancy Guard**: Guarded `loadHistory` with a state lock to prevent overlapping asynchronous Win32 IPC calls across the PyWebView bridge on rapid clicks.
