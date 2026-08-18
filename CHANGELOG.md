@@ -4,9 +4,19 @@ All notable changes to **YT Downloader** are documented in this file following [
 
 ---
 
+### 📌 v2.2.0 - *2026-08-18*
+- 🧩 **Centralized Architecture (`utils.py`)**: Extracted duplicate directory paths, user downloads resolution, and error message cleaners into a unified module adhering to DRY principles.
+- 🛡️ **Enhanced URL & XSS Security**: Upgraded YouTube URL validation with strict domain and path filtering; extended HTML entity escaping to sanitize backtick characters.
+- 🌐 **Modern System Locale Detection**: Replaced deprecated `locale.getdefaultlocale()` with Python 3.11+ compliant `locale.getlocale()` and Win32 UI language query.
+- 🔗 **External Browser Link Dispatcher**: Added `open_url` API handler ensuring external web links (e.g. GitHub profile) open safely in default system browsers.
+- ⚡ **UI Performance & Smoothness**: Implemented 200ms debounce on search queries, lazy-loaded history thumbnails, and added `.animate-fade-in` CSS keyframes for silky-smooth modal popups.
+- 🏷️ **Modal ID Standardization**: Resolved delete modal header ID naming ambiguity.
+
+---
+
 ### 📌 v2.1.1 - *2026-07-03*
 - 🔊 **Universal Audio/Video Codec Compatibility**: Forced native H.264 video (`avc1`) & AAC audio encoding (`-c:a aac`) in MP4 containers so downloaded videos play audio and video natively out of the box in Windows Media Player and Movies & TV without requiring AV1 extensions or VLC.
-- 📋 **Robust 64-bit Windows Clipboard Reader**: Added explicit 64-bit `ctypes` types (`argtypes`/`restype`) and `tkinter` fallback for zero-failure paste button operation on all Windows 10/11 machines.
+- 📋 **Robust 64-bit Windows Clipboard Reader**: Added explicit 64-bit `ctypes` types (`argtypes`/`restype`) for zero-failure paste button operation on all Windows 10/11 machines.
 - 🛡️ **Antivirus & SmartScreen Notes**: Added clarity and release instructions regarding unsigned executable warnings on Windows Defender & Avast DeepScreen.
 
 ---

@@ -28,7 +28,15 @@ downloads/
 *.txt
 !requirements.txt
 
-# IDEs & OS files
+# Release packages & temporary archives
+*.zip
+*.tar.gz
+
+# Temporary Analysis Reports
+PROJE_ANALIZ_RAPORU_*.md
+
+# IDEs, Tools & OS files
+.freebuff/
 .vscode/
 .idea/
 .DS_Store

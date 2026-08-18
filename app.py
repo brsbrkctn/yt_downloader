@@ -3,16 +3,12 @@ import sys
 import time
 import json
 import ctypes
+import locale
 import threading
 import webview
+from utils import get_app_data_dir, open_path_or_url
 from downloader import YTDownloaderEngine
 from history_manager import HistoryManager
-
-def get_app_data_dir():
-    appdata = os.getenv("APPDATA") or os.path.expanduser("~")
-    target_dir = os.path.join(appdata, "YT_Downloader")
-    os.makedirs(target_dir, exist_ok=True)
-    return target_dir
 
 CONFIG_FILE = os.path.join(get_app_data_dir(), "config.json")
 
@@ -90,10 +86,7 @@ class YTDownloaderAPI:
 
     def get_system_language(self):
         try:
-            import locale
-            lang_code = locale.getdefaultlocale()[0]
-            if not lang_code:
-                lang_code = locale.getlocale()[0]
+            lang_code = locale.getlocale()[0]
             if lang_code and lang_code.lower().startswith("tr"):
                 return "tr"
         except Exception:
@@ -190,6 +183,12 @@ class YTDownloaderAPI:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+    def open_url(self, url):
+        try:
+            return open_path_or_url(url)
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
     def read_clipboard(self):
         try:
             return get_clipboard_text()
@@ -220,7 +219,7 @@ def main():
         pos_x, pos_y = None, None
 
     create_args = {
-        "title": "YT Downloader v2.1.1",
+        "title": "YT Downloader v2.2.0",
         "url": file_url,
         "js_api": api,
         "width": 1040,

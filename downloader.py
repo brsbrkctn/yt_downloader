@@ -1,5 +1,4 @@
 import os
-import re
 import time
 import requests
 import imageio_ffmpeg
@@ -8,6 +7,7 @@ from datetime import datetime
 from PIL import Image
 from io import BytesIO
 
+from utils import get_user_downloads_dir, is_valid_youtube_url, clean_ansi_codes
 from history_manager import HistoryManager
 
 try:
@@ -17,54 +17,6 @@ try:
     HAS_MUTAGEN = True
 except ImportError:
     HAS_MUTAGEN = False
-
-def get_user_downloads_dir():
-    try:
-        import winreg
-        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders")
-        val, _ = winreg.QueryValueEx(key, "{374DE290-123F-4565-9164-39C4925E467B}")
-        winreg.CloseKey(key)
-        expanded = os.path.expandvars(val)
-        if os.path.exists(expanded):
-            return expanded
-    except Exception:
-        pass
-
-    default_dl = os.path.join(os.path.expanduser("~"), "Downloads")
-    if os.path.exists(default_dl):
-        return default_dl
-
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "downloads")
-
-def is_valid_youtube_url(url):
-    if not url or not isinstance(url, str):
-        return False
-    url_lower = url.strip().lower()
-    patterns = ["youtube.com/", "youtu.be/", "music.youtube.com/"]
-    return any(p in url_lower for p in patterns)
-
-def clean_ansi_codes(text):
-    if not text:
-        return "Geçersiz veya ulaşılamayan bağlantı."
-    s = str(text)
-    
-    if "Failed to resolve" in s or "getaddrinfo failed" in s or "Name or service not known" in s:
-        return "Geçersiz web adresi veya internet bağlantısı kurulamadı."
-    if "Video unavailable" in s:
-        return "Bu YouTube videosu bulunamadı, gizli veya kaldırılmış."
-    if "Private video" in s:
-        return "Bu video gizli veya özel olarak ayarlanmış."
-    if "is not a valid URL" in s or "Unsupported URL" in s:
-        return "Lütfen geçerli bir YouTube video adresi girin."
-
-    cleaned = re.sub(r'\x1b\[[0-9;]*m', '', s)
-    cleaned = re.sub(r'^ERROR:\s*', '', cleaned, flags=re.IGNORECASE)
-    cleaned = re.sub(r'\(caused by.*\)', '', cleaned, flags=re.IGNORECASE)
-    cleaned = cleaned.strip()
-    
-    if len(cleaned) > 120:
-        cleaned = cleaned[:120] + "..."
-    return cleaned or "Geçersiz YouTube bağlantısı."
 
 class YTDownloaderEngine:
     def __init__(self, download_dir=None):
@@ -149,6 +101,7 @@ class YTDownloaderEngine:
     def download(self, url, format_type="MP4", quality="720p", progress_callback=None):
         """
         Downloads video/audio with given format & quality.
+        Enforces H.264 video and AAC audio for 100% universal Windows Media Player compatibility.
         """
         clean_url_str = self.clean_url(url)
         
@@ -233,6 +186,7 @@ class YTDownloaderEngine:
                 'merge_output_format': 'mp4',
                 'postprocessors': [{
                     'key': 'FFmpegVideoConvertor',
+                    'preferredformat': 'mp4',
                     'preferedformat': 'mp4'
                 }],
                 'postprocessor_args': {

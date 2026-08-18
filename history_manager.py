@@ -5,12 +5,7 @@ import shutil
 import subprocess
 import threading
 from datetime import datetime
-
-def get_app_data_dir():
-    appdata = os.getenv("APPDATA") or os.path.expanduser("~")
-    target_dir = os.path.join(appdata, "YT_Downloader")
-    os.makedirs(target_dir, exist_ok=True)
-    return target_dir
+from utils import get_app_data_dir, get_user_downloads_dir, open_path_or_url
 
 HISTORY_FILE = os.path.join(get_app_data_dir(), "history.json")
 
@@ -50,24 +45,6 @@ def migrate_legacy_history():
                         break
             except Exception as e:
                 print(f"Error migrating history from {old_path}: {e}")
-
-def get_user_downloads_dir():
-    try:
-        import winreg
-        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders")
-        val, _ = winreg.QueryValueEx(key, "{374DE290-123F-4565-9164-39C4925E467B}")
-        winreg.CloseKey(key)
-        expanded = os.path.expandvars(val)
-        if os.path.exists(expanded):
-            return expanded
-    except Exception:
-        pass
-
-    default_dl = os.path.join(os.path.expanduser("~"), "Downloads")
-    if os.path.exists(default_dl):
-        return default_dl
-
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "downloads")
 
 def sanitize_item(item):
     """
@@ -214,11 +191,7 @@ class HistoryManager:
 
     @staticmethod
     def open_file(path):
-        if path and os.path.exists(path):
-            norm_path = os.path.normpath(path)
-            threading.Thread(target=lambda: os.startfile(norm_path), daemon=True).start()
-            return {"success": True}
-        return {"success": False, "error": "Dosya bulunamadı."}
+        return open_path_or_url(path)
 
     @staticmethod
     def open_folder(path):

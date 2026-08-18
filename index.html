@@ -29,6 +29,13 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #135bec;
         }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
     </style>
     <script>
         tailwind.config = {
@@ -57,7 +64,7 @@
             </div>
             <div class="flex flex-col">
                 <span class="text-xl font-bold tracking-tight text-white leading-none">YT Downloader</span>
-                <span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase mt-0.5">v2.1.1</span>
+                <span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase mt-0.5">v2.2.0</span>
             </div>
         </div>
 
@@ -267,7 +274,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
                         </div>
-                        <input id="search-input" type="text" placeholder="Geçmişte ara..." oninput="renderHistory()"
+                        <input id="search-input" type="text" placeholder="Geçmişte ara..." oninput="onSearchInput()"
                                class="w-full h-full bg-card-dark border border-border-dark text-white placeholder-slate-500 rounded-xl pl-11 pr-4 text-sm focus:ring-primary focus:border-primary"/>
                     </div>
                     <div class="flex items-center h-11 bg-card-dark p-1 rounded-xl border border-border-dark shrink-0">
@@ -317,7 +324,7 @@
                     <p id="t-delete-modal-sub" class="text-xs text-slate-400">Bu ögeyi geçmiş listenizden kaldırın.</p>
                 </div>
             </div>
-            <p id="delete-modal-title" class="text-sm text-slate-300 bg-background-dark p-3.5 rounded-xl border border-border-dark font-medium leading-relaxed line-clamp-2">
+            <p id="delete-modal-video-title" class="text-sm text-slate-300 bg-background-dark p-3.5 rounded-xl border border-border-dark font-medium leading-relaxed line-clamp-2">
                 Video Başlığı
             </p>
 
@@ -354,7 +361,7 @@
                 </div>
                 <div class="flex flex-col">
                     <h2 class="text-2xl font-black text-white">YT Downloader</h2>
-                    <span class="text-xs text-primary font-bold">v2.1.1</span>
+                    <span class="text-xs text-primary font-bold">v2.2.0</span>
                 </div>
             </div>
 
@@ -556,12 +563,13 @@
 
         function escapeHtml(text) {
             if (!text) return "";
-            return text
+            return String(text)
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
                 .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+                .replace(/'/g, "&#039;")
+                .replace(/`/g, "&#x60;");
         }
 
         function toggleClearBtn() {
@@ -821,6 +829,14 @@
             renderHistory();
         }
 
+        let searchDebounceTimer = null;
+        function onSearchInput() {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => {
+                renderHistory();
+            }, 200);
+        }
+
         function setFilter(filter) {
             activeFilter = filter;
             document.getElementById("filter-all").className = filter === "ALL" ? "h-full px-4 rounded-lg text-xs font-bold bg-primary text-white transition-all" : "h-full px-4 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all";
@@ -863,13 +879,13 @@
                     return `
                         <div class="bg-card-dark border border-border-dark p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-slate-600 hover:shadow-lg transition-all">
                             <div class="flex items-center gap-4 w-full sm:w-auto">
-                                <img src="${safeThumb}" class="w-32 aspect-video object-cover rounded-xl bg-background-dark shrink-0 border border-border-dark"/>
+                                <img src="${safeThumb}" loading="lazy" class="w-32 aspect-video object-cover rounded-xl bg-background-dark shrink-0 border border-border-dark"/>
                                 <div class="flex flex-col gap-1.5">
                                     <span class="text-xs text-slate-500 font-medium">${safeDate}</span>
                                     <h3 class="text-base font-bold text-white line-clamp-1">${safeTitle}</h3>
                                     <div class="flex items-center gap-2 mt-1">
                                         <span class="bg-primary/20 text-primary border border-primary/30 text-xs font-bold px-2.5 py-0.5 rounded-md">
-                                            ${safeFormat} ${safeQuality}
+                                             ${safeFormat} ${safeQuality}
                                         </span>
                                         ${!item.exists ? `<span class="bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold px-2.5 py-0.5 rounded-md">${t.fileMovedOrDeleted}</span>` : ''}
                                     </div>
@@ -922,11 +938,13 @@
             pendingDeleteId = id;
             const item = historyData.find(h => String(h.id) === String(id));
             const modal = document.getElementById("delete-modal");
-            const titleEl = document.getElementById("delete-modal-title");
+            const titleEl = document.getElementById("delete-modal-video-title");
             const chkFile = document.getElementById("delete-file-checkbox");
             const t = i18n[currentLang] || i18n.en;
             
-            titleEl.innerText = item ? item.title : t.unknownVideo;
+            if (titleEl) {
+                titleEl.innerText = item ? item.title : t.unknownVideo;
+            }
             chkFile.checked = false;
 
             modal.classList.remove("hidden");
@@ -973,10 +991,13 @@
 
         function openGithub(e) {
             e.preventDefault();
-            if (window.pywebview) {
-                window.pywebview.api.open_file("https://github.com/brsbrkctn");
+            const ghUrl = "https://github.com/brsbrkctn";
+            if (window.pywebview && window.pywebview.api && window.pywebview.api.open_url) {
+                window.pywebview.api.open_url(ghUrl);
+            } else if (window.pywebview && window.pywebview.api && window.pywebview.api.open_file) {
+                window.pywebview.api.open_file(ghUrl);
             } else {
-                window.open("https://github.com/brsbrkctn", "_blank");
+                window.open(ghUrl, "_blank");
             }
         }
 
