@@ -64,7 +64,7 @@
             </div>
             <div class="flex flex-col">
                 <span class="text-xl font-bold tracking-tight text-white leading-none">YT Downloader</span>
-                <span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase mt-0.5">v2.2.2</span>
+                <span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase mt-0.5">v2.3.0</span>
             </div>
         </div>
 
@@ -100,6 +100,19 @@
 
     <!-- Main Content Area -->
     <main class="flex-1 max-w-5xl w-full mx-auto p-6 flex flex-col justify-start">
+
+        <!-- Global Inline Error Banner -->
+        <div id="error-banner" class="hidden items-center gap-3 bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-2xl text-sm font-medium animate-fade-in max-w-2xl w-full mx-auto mb-4">
+            <svg class="size-5 text-red-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <span id="error-message" class="flex-1 leading-normal">Bir hata oluştu.</span>
+            <button onclick="hideError()" class="text-red-400/70 hover:text-red-400 p-1">
+                <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
 
         <!-- TAB 1: ANA SAYFA (HOME) -->
         <section id="tab-home" class="flex flex-col gap-8 py-4">
@@ -147,18 +160,7 @@
                     </button>
                 </div>
 
-                <!-- Inline Error Banner -->
-                <div id="error-banner" class="hidden items-center gap-3 bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-2xl text-sm font-medium animate-fade-in">
-                    <svg class="size-5 text-red-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                    </svg>
-                    <span id="error-message" class="flex-1 leading-normal">Bir hata oluştu.</span>
-                    <button onclick="hideError()" class="text-red-400/70 hover:text-red-400 p-1">
-                        <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
+                
             </div>
 
             <!-- Fetch Loading Spinner -->
@@ -361,7 +363,7 @@
                 </div>
                 <div class="flex flex-col">
                     <h2 class="text-2xl font-black text-white">YT Downloader</h2>
-                    <span class="text-xs text-primary font-bold">v2.2.2</span>
+                    <span class="text-xs text-primary font-bold">v2.3.0</span>
                 </div>
             </div>
 
@@ -771,6 +773,11 @@
             if (data.status === "error") {
                 showError(data.text || t.errFetch);
                 document.getElementById("btn-download").disabled = false;
+                const pContainer = document.getElementById("progress-container");
+                if (pContainer) {
+                    pContainer.classList.add("hidden");
+                    pContainer.classList.remove("flex");
+                }
                 return;
             }
 
@@ -896,7 +903,7 @@
                     return `
                         <div class="bg-card-dark border border-border-dark p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-slate-600 hover:shadow-lg transition-all">
                             <div class="flex items-center gap-4 w-full sm:w-auto">
-                                <img src="${safeThumb}" loading="lazy" class="w-32 aspect-video object-cover rounded-xl bg-background-dark shrink-0 border border-border-dark"/>
+                                <img src="${safeThumb}" loading="lazy" onerror="this.onerror=null; this.src='icon2.ico'; this.classList.add('p-3', 'object-contain', 'opacity-40');" class="w-32 aspect-video object-cover rounded-xl bg-background-dark shrink-0 border border-border-dark"/>
                                 <div class="flex flex-col gap-1.5">
                                     <span class="text-xs text-slate-500 font-medium">${safeDate}</span>
                                     <h3 class="text-base font-bold text-white line-clamp-1">${safeTitle}</h3>
@@ -1049,6 +1056,13 @@
             showAppUI();
             isLangLoaded = true;
         }
+
+                document.addEventListener("keydown", function(e) {
+            if (e.key === "Escape") {
+                closeDeleteModal();
+                closeAboutModal();
+            }
+        });
 
         document.addEventListener("DOMContentLoaded", function() {
             const saved = localStorage.getItem("yt_downloader_lang");

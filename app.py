@@ -130,7 +130,7 @@ class YTDownloaderAPI:
         def progress_callback(progress_data):
             if self.window:
                 try:
-                    progress_json = json.dumps(progress_data)
+                    progress_json = json.dumps(progress_data, ensure_ascii=True)
                     js_code = f"if (window.updateProgress) window.updateProgress({progress_json});"
                     self.window.evaluate_js(js_code)
                 except Exception:
@@ -141,7 +141,7 @@ class YTDownloaderAPI:
                 result_item = self.engine.download(url, format_type, quality, progress_callback=progress_callback)
                 if self.window:
                     try:
-                        js_code = f"if (window.onDownloadComplete) window.onDownloadComplete({json.dumps(result_item)});"
+                        js_code = f"if (window.onDownloadComplete) window.onDownloadComplete({json.dumps(result_item, ensure_ascii=True)});"
                         self.window.evaluate_js(js_code)
                     except Exception:
                         pass
@@ -150,7 +150,7 @@ class YTDownloaderAPI:
                 if self.window:
                     try:
                         err_payload = {"status": "error", "percent": 0, "text": f"Hata: {error_msg}"}
-                        self.window.evaluate_js(f"if (window.updateProgress) window.updateProgress({json.dumps(err_payload)});" )
+                        self.window.evaluate_js(f"if (window.updateProgress) window.updateProgress({json.dumps(err_payload, ensure_ascii=True)});" )
                     except Exception:
                         pass
 
@@ -217,7 +217,7 @@ def main():
         pos_x, pos_y = None, None
 
     create_args = {
-        "title": "YT Downloader v2.2.2",
+        "title": "YT Downloader v2.3.0",
         "url": file_url,
         "js_api": api,
         "width": 1040,

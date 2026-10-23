@@ -44,6 +44,7 @@ class YTDownloaderEngine:
     def fetch_info(self, url):
         """
         Extracts video metadata without downloading.
+        Accurately extracts all available resolutions (1080p, 720p, 480p, 360p).
         """
         clean_url_str = self.clean_url(url)
         
@@ -57,15 +58,6 @@ class YTDownloaderEngine:
             'ffmpeg_location': self.ffmpeg_path,
             'nocheckcertificate': True,
             'noplaylist': True,
-            'extractor_args': {
-                'youtube': {
-                    'player_client': ['android', 'web'],
-                }
-            },
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept-Language': 'en-US,en;q=0.9',
-            }
         }
         
         try:
@@ -170,16 +162,8 @@ class YTDownloaderEngine:
             'ffmpeg_location': self.ffmpeg_path,
             'nocheckcertificate': True,
             'noplaylist': True,
-            'concurrent_fragment_downloads': 4,
-            'extractor_args': {
-                'youtube': {
-                    'player_client': ['android', 'web'],
-                }
-            },
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept-Language': 'en-US,en;q=0.9',
-            }
+            'windowsfilenames': True,
+            'trim_file_name': 160,
         }
 
         bitrate = "192"
@@ -270,40 +254,46 @@ class YTDownloaderEngine:
         return history_item
 
     def _embed_mp3_tags(self, mp3_file, info):
-        audio = MP3(mp3_file, ID3=ID3)
         try:
-            audio.add_tags()
-        except ID3Error:
-            pass
-
-        title = info.get('title', '')
-        artist = info.get('uploader') or info.get('channel') or ''
-        thumb_url = info.get('thumbnail')
-
-        if title:
-            audio.tags.add(TIT2(encoding=3, text=title))
-        if artist:
-            audio.tags.add(TPE1(encoding=3, text=artist))
-
-        if thumb_url:
+            audio = MP3(mp3_file, ID3=ID3)
             try:
-                resp = requests.get(thumb_url, timeout=5)
-                if resp.status_code == 200:
-                    img = Image.open(BytesIO(resp.content))
-                    if img.mode != 'RGB':
-                        img = img.convert('RGB')
-                    buf = BytesIO()
-                    img.save(buf, format='JPEG', quality=90)
-                    jpeg_bytes = buf.getvalue()
-
-                    audio.tags.add(APIC(
-                        encoding=3,
-                        mime='image/jpeg',
-                        type=3, # Front Cover
-                        desc='Cover',
-                        data=jpeg_bytes
-                    ))
-            except Exception:
+                audio.add_tags()
+            except ID3Error:
                 pass
 
-        audio.save()
+            if audio.tags is None:
+                audio.init_tags()
+
+            title = info.get('title', '')
+            artist = info.get('uploader') or info.get('channel') or ''
+            thumb_url = info.get('thumbnail')
+
+            if title:
+                audio.tags.add(TIT2(encoding=3, text=title))
+            if artist:
+                audio.tags.add(TPE1(encoding=3, text=artist))
+
+            if thumb_url:
+                try:
+                    resp = requests.get(thumb_url, timeout=5)
+                    if resp.status_code == 200:
+                        img = Image.open(BytesIO(resp.content))
+                        if img.mode != 'RGB':
+                            img = img.convert('RGB')
+                        buf = BytesIO()
+                        img.save(buf, format='JPEG', quality=90)
+                        jpeg_bytes = buf.getvalue()
+
+                        audio.tags.add(APIC(
+                            encoding=3,
+                            mime='image/jpeg',
+                            type=3, # Front Cover
+                            desc='Cover',
+                            data=jpeg_bytes
+                        ))
+                except Exception:
+                    pass
+
+            audio.save()
+        except Exception:
+            pass

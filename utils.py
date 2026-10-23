@@ -84,6 +84,12 @@ def clean_ansi_codes(text: str) -> str:
         return "Bu video gizli veya özel olarak ayarlanmış."
     if "is not a valid URL" in s or "Unsupported URL" in s:
         return "Lütfen geçerli bir YouTube video adresi girin."
+    if "403: Forbidden" in s or "HTTP Error 403" in s:
+        return "YouTube video akışına geçici erişim kısıtlaması uyguladı (403 Forbidden). Lütfen birkaç saniye sonra tekrar deneyin."
+    if "sign in" in s.lower() and "bot" in s.lower():
+        return "YouTube bot doğrulaması istedi. Lütfen birkaç dakika sonra tekrar deneyin."
+    if "page needs to be reloaded" in s.lower():
+        return "Bağlantı zaman aşımına uğradı. Lütfen tekrar deneyin."
 
     cleaned = re.sub(r'\x1b\[[0-9;]*m', '', s)
     cleaned = re.sub(r'^ERROR:\s*', '', cleaned, flags=re.IGNORECASE)

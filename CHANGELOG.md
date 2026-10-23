@@ -4,6 +4,17 @@ All notable changes to **YT Downloader** are documented in this file following [
 
 ---
 
+### 📌 v2.3.0 - *2026-10-23*
+- 🚀 **Core Engine Upgrade (`yt-dlp>=2026.10.21`)**: Upgraded core YouTube extraction engine to the latest October 2026 upstream release, natively handling YouTube's latest n-challenge signatures, VisionOS/m3u8 stream manifests, and anti-bot token checks.
+- 🎯 **Full HD 1080p Quality Restoration**: Removed restrictive player client constraints during metadata fetch, restoring full detection and selection of 1080p, 720p, and 480p qualities across all videos.
+- 🛡️ **Windows Filesystem & Path Overflow Safety**: Enforced `windowsfilenames: True` and path truncation (`trim_file_name: 160`) to prevent Windows `MAX_PATH` (260 char limit) filesystem crashes and illegal character corruption (`|`, `:`, `"`, `?`, etc.).
+- 🌐 **Global Error Banner & History Tab Visibility**: Relocated the error notification banner to the top-level app layout so errors encountered during History operations (such as opening moved or deleted media) are immediately displayed to the user.
+- 🖼️ **Thumbnail Fallback Resilience**: Added graceful fallback handlers for expired or blocked remote YouTube thumbnails in the History list, rendering clean in-app icon placeholders instead of broken images.
+- ⌨️ **Desktop Keyboard UX**: Added global `Escape` key shortcut support to quickly dismiss Delete confirmation and About dialogs.
+- 🔒 **Defensive MP3 Metadata & Unicode IPC**: Hardened Mutagen ID3 tag initialization against uninitialized audio streams and enforced pure ASCII-safe JSON serialization across all WebView2 IPC progress callbacks.
+
+---
+
 ### 📌 v2.2.2 - *2026-08-18*
 - 🔧 **FFmpeg Video Convertor Keyword Fix**: Fixed `FFmpegVideoConvertorPP` keyword parameter to exact yt-dlp internal signature (`preferedformat`), eliminating `unexpected keyword argument 'preferredformat'` on MP4 downloads.
 - 🎵 **YouTube Music & Android Client 403 Bypass**: Added automatic `music.youtube.com` normalization and multi-client player extractor arguments (`android`, `web`), permanently resolving `HTTP Error 403: Forbidden` across YouTube Music and restricted audio/video streams.

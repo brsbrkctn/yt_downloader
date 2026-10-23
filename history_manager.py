@@ -75,7 +75,7 @@ def sanitize_item(item):
 
 class HistoryManager:
     _cached_history = None
-    _lock = threading.Lock()
+    _lock = threading.RLock()
 
     @staticmethod
     def load_history(force_refresh=False):
@@ -86,40 +86,41 @@ class HistoryManager:
             # Attempt migration if needed
             migrate_legacy_history()
 
-            if not os.path.exists(HISTORY_FILE):
-                HistoryManager._cached_history = []
-                return []
-
-            try:
-                with open(HISTORY_FILE, "r", encoding="utf-8") as f:
-                    raw_history = json.load(f)
-                    
-                if not raw_history or not isinstance(raw_history, list):
-                    HistoryManager._cached_history = []
-                    return []
-
-                cleaned_list = []
-                dirty = False
-                for idx, raw in enumerate(raw_history):
-                    if not isinstance(raw, dict):
-                        continue
-                    if "id" not in raw or not raw["id"]:
-                        raw["id"] = f"item_{idx}_{int(datetime.now().timestamp())}"
-                        dirty = True
-                    cleaned_list.append(sanitize_item(raw))
-
-                if dirty:
+            raw_history = None
+            for candidate in [HISTORY_FILE, HISTORY_FILE + ".tmp"]:
+                if os.path.exists(candidate):
                     try:
-                        with open(HISTORY_FILE, "w", encoding="utf-8") as wf:
-                            json.dump(cleaned_list, wf, ensure_ascii=False, indent=2)
+                        with open(candidate, "r", encoding="utf-8") as f:
+                            data = json.load(f)
+                            if isinstance(data, list):
+                                raw_history = data
+                                break
                     except Exception:
-                        pass
+                        continue
 
-                HistoryManager._cached_history = cleaned_list
-                return [dict(x) for x in cleaned_list]
-            except Exception as e:
+            if raw_history is None or not isinstance(raw_history, list):
                 HistoryManager._cached_history = []
                 return []
+
+            cleaned_list = []
+            dirty = False
+            for idx, raw in enumerate(raw_history):
+                if not isinstance(raw, dict):
+                    continue
+                if "id" not in raw or not raw["id"]:
+                    raw["id"] = f"item_{idx}_{int(datetime.now().timestamp())}"
+                    dirty = True
+                cleaned_list.append(sanitize_item(raw))
+
+            if dirty:
+                try:
+                    with open(HISTORY_FILE, "w", encoding="utf-8") as wf:
+                        json.dump(cleaned_list, wf, ensure_ascii=False, indent=2)
+                except Exception:
+                    pass
+
+            HistoryManager._cached_history = cleaned_list
+            return [dict(x) for x in cleaned_list]
 
     @staticmethod
     def get_history():
@@ -170,7 +171,7 @@ class HistoryManager:
                 
         if target_item and delete_file:
             path = target_item.get("path")
-            if path and os.path.exists(path):
+            if path and os.path.isfile(path):
                 try:
                     os.remove(path)
                 except Exception:

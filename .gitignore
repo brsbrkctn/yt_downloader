@@ -25,6 +25,8 @@ downloads/
 *.mp3
 *.m4a
 *.webm
+*.part
+*.ytdl
 *.txt
 !requirements.txt
 

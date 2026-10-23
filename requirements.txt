@@ -1,4 +1,4 @@
-yt-dlp>=2024.0.0
+yt-dlp>=2026.10.21
 pywebview>=5.0.0
 imageio-ffmpeg>=0.4.9
 mutagen>=1.47.0
