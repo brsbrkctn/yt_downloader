@@ -100,14 +100,19 @@ def clean_ansi_codes(text: str) -> str:
         cleaned = cleaned[:120] + "..."
     return cleaned or "Geçersiz YouTube bağlantısı."
 
+ALLOWED_MEDIA_EXTS = {
+    ".mp4", ".mp3", ".m4a", ".webm", ".mkv", ".wav", ".avi", ".flv",
+    ".png", ".jpg", ".jpeg", ".webp"
+}
+
 def open_path_or_url(target: str) -> dict:
-    """Opens a file, directory, or web URL safely in the appropriate Windows application or default browser."""
+    """Safely opens a media file, directory, or legitimate web URL in the default Windows application."""
     if not target:
         return {"success": False, "error": "Geçersiz hedef."}
 
     target_str = str(target).strip()
 
-    # Web URL
+    # Web URL: strictly HTTP/HTTPS only
     if target_str.startswith("http://") or target_str.startswith("https://"):
         try:
             threading.Thread(target=lambda: webbrowser.open(target_str), daemon=True).start()
@@ -118,6 +123,10 @@ def open_path_or_url(target: str) -> dict:
     # Local File or Directory
     norm_path = os.path.normpath(target_str)
     if os.path.exists(norm_path):
+        if os.path.isfile(norm_path):
+            ext = os.path.splitext(norm_path)[1].lower()
+            if ext not in ALLOWED_MEDIA_EXTS:
+                return {"success": False, "error": f"Güvenlik nedeniyle '{ext}' uzantılı dosyalar doğrudan açılamaz."}
         try:
             threading.Thread(target=lambda: os.startfile(norm_path), daemon=True).start()
             return {"success": True}

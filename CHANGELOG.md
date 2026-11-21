@@ -4,6 +4,26 @@ All notable changes to **YT Downloader** are documented in this file following [
 
 ---
 
+### 📌 v2.4.0 - *2026-11-21*
+- ⏹️ **In-Flight Download Cancellation**: Users can now cancel an active download anytime directly from the progress bar. Cleanly terminates yt-dlp threads and sweeps any leftover `.part` / `.ytdl` files from disk automatically.
+- 🚀 **Multi-Fragment DASH Acceleration**: Enhanced download throughput by enabling 5 concurrent fragment downloads (`concurrent_fragment_downloads: 5`), socket timeouts (15s), and adaptive retry thresholds for faster downloads.
+- 📺 **4K Ultra HD & 2K Resolution Detection**: Expanded available quality extraction up to 4K (2160p), 1440p (2K), and 8K (4320p), with smart fallback to H.264 / AAC for maximum Windows compatibility.
+- ⚡ **IPC Event Throttling & Zero Win32 Starvation**: Throttled high-frequency yt-dlp progress callbacks across the PyWebView bridge to 150ms intervals or 0.5% increments, completely eliminating WebView2 message queue flooding and UI lag.
+- 🛡️ **Filesystem & Execution Security Hardening**: Restricted `open_path_or_url()` in `utils.py` strictly to authorized media extensions (`.mp4`, `.mp3`, etc.) and HTTP/HTTPS URLs, preventing execution of arbitrary local binaries. Fixed multi-arg string escaping in Explorer folder navigation.
+- 🔒 **Leak-Proof Win32 Clipboard Lock**: Wrapped `kernel32.GlobalUnlock(handle)` in a defensive `try...finally` block and clamped clipboard input to 2048 characters to eliminate Win32 global memory leaks.
+- 🎨 **Apple HIG & Emil Kowalski UI Polish**:
+  - Implemented `.tabular-nums` and monospace font styling on percentage, ETA, and speed metrics to eliminate jitter during rapid updates.
+  - Added tactile button press feedback (`active:scale-[0.98] transition-transform`) across all action buttons.
+  - Replaced browser-default select chevron with custom SVG dropdown and `appearance-none`.
+  - Added dedicated search clear (X) button with instant reset.
+  - Upgraded search matching to support full Turkish casing (`toLocaleLowerCase(currentLang)`).
+  - Clearly separated "Zero History" and "Search No Results" empty states with a direct filter reset action.
+  - Automatically disabled file and folder action buttons for missing/deleted media (`!item.exists`).
+  - Added modal backdrop click dismissal for Delete and About dialogs.
+- 📦 **Clean Standalone Distribution**: Excluded developer `history.json` from PyInstaller bundle specifications to ensure pristine out-of-the-box user state.
+
+---
+
 ### 📌 v2.3.0 - *2026-10-23*
 - 🚀 **Core Engine Upgrade (`yt-dlp>=2026.10.21`)**: Upgraded core YouTube extraction engine to the latest October 2026 upstream release, natively handling YouTube's latest n-challenge signatures, VisionOS/m3u8 stream manifests, and anti-bot token checks.
 - 🎯 **Full HD 1080p Quality Restoration**: Removed restrictive player client constraints during metadata fetch, restoring full detection and selection of 1080p, 720p, and 480p qualities across all videos.

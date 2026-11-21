@@ -134,60 +134,60 @@ class HistoryManager:
 
     @staticmethod
     def add_to_history(item):
-        history = HistoryManager.load_history(force_refresh=True)
-        
-        # Deduplicate by URL & Format
-        history = [h for h in history if not (h.get("url") == item.get("url") and h.get("format") == item.get("format"))]
-        
-        if "id" not in item:
-            item["id"] = f"{int(datetime.now().timestamp()*1000)}"
-            
-        sanitized = sanitize_item(item)
-        history.insert(0, sanitized)
-        
-        try:
-            temp_file = HISTORY_FILE + ".tmp"
-            with open(temp_file, "w", encoding="utf-8") as f:
-                json.dump(history, f, ensure_ascii=False, indent=2)
-            os.replace(temp_file, HISTORY_FILE)
-        except Exception:
-            pass
-
         with HistoryManager._lock:
+            history = HistoryManager.load_history(force_refresh=True)
+            
+            # Deduplicate by URL & Format
+            history = [h for h in history if not (h.get("url") == item.get("url") and h.get("format") == item.get("format"))]
+            
+            if "id" not in item:
+                item["id"] = f"{int(datetime.now().timestamp()*1000)}"
+                
+            sanitized = sanitize_item(item)
+            history.insert(0, sanitized)
+            
+            try:
+                temp_file = HISTORY_FILE + ".tmp"
+                with open(temp_file, "w", encoding="utf-8") as f:
+                    json.dump(history, f, ensure_ascii=False, indent=2)
+                os.replace(temp_file, HISTORY_FILE)
+            except Exception:
+                pass
+
             HistoryManager._cached_history = history
-        return [dict(x) for x in history]
+            return [dict(x) for x in history]
 
     @staticmethod
     def delete_item(item_id, delete_file=False):
-        history = HistoryManager.load_history(force_refresh=True)
-        target_item = None
-        new_history = []
-        
-        for item in history:
-            if str(item.get("id")) == str(item_id):
-                target_item = item
-            else:
-                new_history.append(item)
-                
-        if target_item and delete_file:
-            path = target_item.get("path")
-            if path and os.path.isfile(path):
-                try:
-                    os.remove(path)
-                except Exception:
-                    pass
-                    
-        try:
-            temp_file = HISTORY_FILE + ".tmp"
-            with open(temp_file, "w", encoding="utf-8") as f:
-                json.dump(new_history, f, ensure_ascii=False, indent=2)
-            os.replace(temp_file, HISTORY_FILE)
-        except Exception:
-            pass
-
         with HistoryManager._lock:
+            history = HistoryManager.load_history(force_refresh=True)
+            target_item = None
+            new_history = []
+            
+            for item in history:
+                if str(item.get("id")) == str(item_id):
+                    target_item = item
+                else:
+                    new_history.append(item)
+                    
+            if target_item and delete_file:
+                path = target_item.get("path")
+                if path and os.path.isfile(path):
+                    try:
+                        os.remove(path)
+                    except Exception:
+                        pass
+                        
+            try:
+                temp_file = HISTORY_FILE + ".tmp"
+                with open(temp_file, "w", encoding="utf-8") as f:
+                    json.dump(new_history, f, ensure_ascii=False, indent=2)
+                os.replace(temp_file, HISTORY_FILE)
+            except Exception:
+                pass
+
             HistoryManager._cached_history = new_history
-        return [dict(x) for x in new_history]
+            return [dict(x) for x in new_history]
 
     @staticmethod
     def open_file(path):
@@ -198,7 +198,7 @@ class HistoryManager:
         if path:
             norm_path = os.path.normpath(path)
             if os.path.exists(norm_path):
-                threading.Thread(target=lambda: subprocess.Popen(['explorer', '/select,', norm_path]), daemon=True).start()
+                threading.Thread(target=lambda: subprocess.Popen(['explorer', f'/select,{norm_path}']), daemon=True).start()
                 return {"success": True}
             else:
                 downloads_dir = os.path.dirname(norm_path)

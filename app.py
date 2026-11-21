@@ -7,7 +7,7 @@ import locale
 import threading
 import webview
 from utils import get_app_data_dir, open_path_or_url
-from downloader import YTDownloaderEngine
+from downloader import YTDownloaderEngine, DownloadCancelledException
 from history_manager import HistoryManager
 
 CONFIG_FILE = os.path.join(get_app_data_dir(), "config.json")
@@ -58,10 +58,12 @@ def get_clipboard_text():
                 if handle:
                     pointer = kernel32.GlobalLock(handle)
                     if pointer:
-                        text = ctypes.c_wchar_p(pointer).value
-                        kernel32.GlobalUnlock(handle)
-                        if text:
-                            return text
+                        try:
+                            clip_text = ctypes.c_wchar_p(pointer).value
+                            if clip_text:
+                                return clip_text[:2048]
+                        finally:
+                            kernel32.GlobalUnlock(handle)
             finally:
                 user32.CloseClipboard()
     except Exception as e:
@@ -73,6 +75,13 @@ class YTDownloaderAPI:
     def __init__(self, window_holder):
         self.window_holder = window_holder
         self._engine = None
+        self._active_cancel_event = None
+
+    def cancel_download(self):
+        if self._active_cancel_event:
+            self._active_cancel_event.set()
+            return {"success": True}
+        return {"success": False, "error": "Aktif bir indirme yok."}
 
     @property
     def engine(self):
@@ -127,22 +136,42 @@ class YTDownloaderAPI:
             return {"success": False, "error": str(e)}
 
     def start_download(self, url, format_type, quality):
+        self._active_cancel_event = threading.Event()
+        cancel_evt = self._active_cancel_event
+
+        last_progress_time = [0.0]
+        last_progress_pct = [-1.0]
+
         def progress_callback(progress_data):
             if self.window:
-                try:
-                    progress_json = json.dumps(progress_data, ensure_ascii=True)
-                    js_code = f"if (window.updateProgress) window.updateProgress({progress_json});"
-                    self.window.evaluate_js(js_code)
-                except Exception:
-                    pass
+                now = time.time()
+                pct = progress_data.get("percent", 0)
+                status = progress_data.get("status")
+                # IPC throttling: prevent Win32 UI queue starvation on high-speed downloads
+                if status in ("completed", "error", "cancelled") or (now - last_progress_time[0] >= 0.15) or abs(pct - last_progress_pct[0]) >= 0.5:
+                    last_progress_time[0] = now
+                    last_progress_pct[0] = pct
+                    try:
+                        progress_json = json.dumps(progress_data, ensure_ascii=True)
+                        js_code = f"if (window.updateProgress) window.updateProgress({progress_json});"
+                        self.window.evaluate_js(js_code)
+                    except Exception:
+                        pass
 
         def worker():
             try:
-                result_item = self.engine.download(url, format_type, quality, progress_callback=progress_callback)
+                result_item = self.engine.download(url, format_type, quality, progress_callback=progress_callback, cancel_event=cancel_evt)
                 if self.window:
                     try:
                         js_code = f"if (window.onDownloadComplete) window.onDownloadComplete({json.dumps(result_item, ensure_ascii=True)});"
                         self.window.evaluate_js(js_code)
+                    except Exception:
+                        pass
+            except DownloadCancelledException:
+                if self.window:
+                    try:
+                        cancel_payload = {"status": "cancelled", "percent": 0, "text": "İndirme iptal edildi."}
+                        self.window.evaluate_js(f"if (window.updateProgress) window.updateProgress({json.dumps(cancel_payload, ensure_ascii=True)});")
                     except Exception:
                         pass
             except Exception as e:
@@ -150,9 +179,12 @@ class YTDownloaderAPI:
                 if self.window:
                     try:
                         err_payload = {"status": "error", "percent": 0, "text": f"Hata: {error_msg}"}
-                        self.window.evaluate_js(f"if (window.updateProgress) window.updateProgress({json.dumps(err_payload, ensure_ascii=True)});" )
+                        self.window.evaluate_js(f"if (window.updateProgress) window.updateProgress({json.dumps(err_payload, ensure_ascii=True)});")
                     except Exception:
                         pass
+            finally:
+                if self._active_cancel_event is cancel_evt:
+                    self._active_cancel_event = None
 
         threading.Thread(target=worker, daemon=True).start()
         return {"success": True}
@@ -217,7 +249,7 @@ def main():
         pos_x, pos_y = None, None
 
     create_args = {
-        "title": "YT Downloader v2.3.0",
+        "title": "YT Downloader v2.4.0",
         "url": file_url,
         "js_api": api,
         "width": 1040,

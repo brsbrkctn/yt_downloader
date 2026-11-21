@@ -53,6 +53,10 @@
             }
         }
     </script>
+    <style>
+        .tabular-nums { font-variant-numeric: tabular-nums; }
+        body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    </style>
 </head>
 <body id="app-body" style="display: none;" class="bg-background-dark text-white min-h-screen flex flex-col select-none">
 
@@ -64,7 +68,7 @@
             </div>
             <div class="flex flex-col">
                 <span class="text-xl font-bold tracking-tight text-white leading-none">YT Downloader</span>
-                <span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase mt-0.5">v2.3.0</span>
+                <span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase mt-0.5">v2.4.0</span>
             </div>
         </div>
 
@@ -152,7 +156,7 @@
                         </svg>
                     </button>
                     <button id="btn-fetch" onclick="fetchVideoInfo()" 
-                            class="bg-primary hover:bg-primary/90 text-white font-bold px-6 py-3 rounded-xl transition-all flex items-center gap-2 shrink-0 shadow-lg shadow-primary/20">
+                            class="bg-primary hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-6 py-3 rounded-xl transition-all flex items-center gap-2 shrink-0 shadow-lg shadow-primary/20">
                         <svg id="fetch-btn-icon" class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
@@ -209,14 +213,19 @@
                     </div>
 
                     <!-- Quality Dropdown -->
-                    <div class="w-full sm:w-52">
-                        <select id="quality-select" class="w-full bg-background-dark border border-border-dark text-white text-sm font-bold rounded-xl px-4 py-2.5 focus:ring-primary focus:border-primary">
+                    <div class="relative w-full sm:w-52">
+                        <select id="quality-select" class="w-full bg-background-dark border border-border-dark text-white text-sm font-bold rounded-xl px-4 py-2.5 pr-10 focus:ring-primary focus:border-primary appearance-none cursor-pointer">
                             <!-- Populated dynamically -->
                         </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                            <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
                     </div>
 
                     <!-- Download Button -->
-                    <button id="btn-download" onclick="startDownload()" class="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white font-bold px-8 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+                    <button id="btn-download" onclick="startDownload()" class="w-full sm:w-auto bg-primary hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-8 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
                         <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                         </svg>
@@ -225,17 +234,25 @@
                 </div>
 
                 <!-- Progress Area -->
-                <div id="progress-container" class="hidden flex-col gap-3 bg-background-dark p-4 rounded-xl border border-border-dark mt-2">
+                <div id="progress-container" class="hidden flex-col gap-3 bg-background-dark p-4 rounded-xl border border-border-dark mt-2 animate-fade-in">
                     <div class="flex items-center justify-between text-sm font-bold">
                         <span id="progress-text" class="text-slate-200">İndirme başlatılıyor...</span>
-                        <span id="progress-percent" class="text-primary">%0</span>
+                        <span id="progress-percent" class="text-primary tabular-nums font-mono">%0</span>
                     </div>
                     <div class="w-full bg-border-dark rounded-full h-3 overflow-hidden">
-                        <div id="progress-bar" class="bg-primary h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                        <div id="progress-bar" class="bg-primary h-full rounded-full transition-all duration-200" style="width: 0%"></div>
                     </div>
-                    <div id="progress-stats" class="flex items-center justify-between text-xs text-slate-400">
-                        <span id="stat-speed">Hız: --</span>
-                        <span id="stat-eta">Kalan Süre: --</span>
+                    <div class="flex items-center justify-between">
+                        <div id="progress-stats" class="flex items-center gap-4 text-xs text-slate-400 tabular-nums font-mono">
+                            <span id="stat-speed">Hız: --</span>
+                            <span id="stat-eta">Kalan Süre: --</span>
+                        </div>
+                        <button id="btn-cancel-download" onclick="cancelDownload()" class="text-xs font-bold text-red-400 hover:text-red-300 hover:bg-red-500/10 active:scale-95 px-3 py-1 rounded-lg border border-red-500/30 transition-all flex items-center gap-1.5">
+                            <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            <span id="t-btn-cancel-dl">İptal Et</span>
+                        </button>
                     </div>
                 </div>
 
@@ -277,7 +294,12 @@
                             </svg>
                         </div>
                         <input id="search-input" type="text" placeholder="Geçmişte ara..." oninput="onSearchInput()"
-                               class="w-full h-full bg-card-dark border border-border-dark text-white placeholder-slate-500 rounded-xl pl-11 pr-4 text-sm focus:ring-primary focus:border-primary"/>
+                               class="w-full h-full bg-card-dark border border-border-dark text-white placeholder-slate-500 rounded-xl pl-11 pr-10 text-sm focus:ring-primary focus:border-primary"/>
+                        <button id="btn-search-clear" onclick="clearSearch()" title="Aramayı Temizle" class="hidden absolute right-2.5 top-0 bottom-0 my-auto h-6 w-6 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+                            <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
                     </div>
                     <div class="flex items-center h-11 bg-card-dark p-1 rounded-xl border border-border-dark shrink-0">
                         <button id="filter-all" onclick="setFilter('ALL')" class="h-full px-4 rounded-lg text-xs font-bold bg-primary text-white transition-all">Tümü</button>
@@ -363,7 +385,7 @@
                 </div>
                 <div class="flex flex-col">
                     <h2 class="text-2xl font-black text-white">YT Downloader</h2>
-                    <span class="text-xs text-primary font-bold">v2.3.0</span>
+                    <span class="text-xs text-primary font-bold">v2.4.0</span>
                 </div>
             </div>
 
@@ -450,7 +472,12 @@
                 studioQuality: "320 kbps (Stüdyo Kalitesi)",
                 highQuality: "256 kbps (Yüksek)",
                 stdQuality: "192 kbps (Standart)",
-                lowQuality: "128 kbps (Düşük)"
+                lowQuality: "128 kbps (Düşük)",
+                btnCancelDl: "İptal Et",
+                searchNoResultTitle: "Sonuç bulunamadı",
+                searchNoResultDesc: "Aramanızla eşleşen bir indirme geçmişi yok.",
+                btnClearSearch: "Aramayı Temizle",
+                downloadCancelled: "İndirme iptal edildi."
             },
             en: {
                 navHome: "Home",
@@ -496,7 +523,12 @@
                 studioQuality: "320 kbps (Studio Quality)",
                 highQuality: "256 kbps (High)",
                 stdQuality: "192 kbps (Standard)",
-                lowQuality: "128 kbps (Low)"
+                lowQuality: "128 kbps (Low)",
+                btnCancelDl: "Cancel",
+                searchNoResultTitle: "No results found",
+                searchNoResultDesc: "No download history matches your search query.",
+                btnClearSearch: "Clear Search",
+                downloadCancelled: "Download cancelled."
             }
         };
 
@@ -537,6 +569,8 @@
             document.getElementById("t-btn-download").innerText = t.btnDownload;
             document.getElementById("t-btn-open-file").innerText = t.btnOpenFile;
             document.getElementById("t-btn-open-folder").innerText = t.btnOpenFolder;
+            const cancelDlEl = document.getElementById("t-btn-cancel-dl");
+            if (cancelDlEl) cancelDlEl.innerText = t.btnCancelDl;
 
             document.getElementById("t-history-page-title").innerText = t.historyTitle;
             document.getElementById("search-input").placeholder = t.searchPlaceholder;
@@ -770,9 +804,15 @@
 
         function updateProgress(data) {
             const t = i18n[currentLang] || i18n.en;
-            if (data.status === "error") {
-                showError(data.text || t.errFetch);
+            if (data.status === "error" || data.status === "cancelled") {
+                if (data.status === "cancelled") {
+                    showError(t.downloadCancelled);
+                } else {
+                    showError(data.text || t.errFetch);
+                }
                 document.getElementById("btn-download").disabled = false;
+                const btnCancel = document.getElementById("btn-cancel-download");
+                if (btnCancel) btnCancel.disabled = false;
                 const pContainer = document.getElementById("progress-container");
                 if (pContainer) {
                     pContainer.classList.add("hidden");
@@ -853,39 +893,88 @@
             renderHistory();
         }
 
+        async function cancelDownload() {
+            const btnCancel = document.getElementById("btn-cancel-download");
+            if (btnCancel) btnCancel.disabled = true;
+            if (window.pywebview && window.pywebview.api && window.pywebview.api.cancel_download) {
+                try {
+                    await window.pywebview.api.cancel_download();
+                } catch(e) {
+                    console.error("Cancel error:", e);
+                }
+            }
+        }
+
+        function clearSearch() {
+            const inputEl = document.getElementById("search-input");
+            inputEl.value = "";
+            const clearBtn = document.getElementById("btn-search-clear");
+            if (clearBtn) clearBtn.classList.add("hidden");
+            renderHistory();
+        }
+
         let searchDebounceTimer = null;
         function onSearchInput() {
+            const searchVal = document.getElementById("search-input").value;
+            const clearBtn = document.getElementById("btn-search-clear");
+            if (clearBtn) {
+                if (searchVal.length > 0) clearBtn.classList.remove("hidden");
+                else clearBtn.classList.add("hidden");
+            }
             clearTimeout(searchDebounceTimer);
             searchDebounceTimer = setTimeout(() => {
                 renderHistory();
-            }, 200);
+            }, 150);
         }
 
         function setFilter(filter) {
             activeFilter = filter;
-            document.getElementById("filter-all").className = filter === "ALL" ? "h-full px-4 rounded-lg text-xs font-bold bg-primary text-white transition-all" : "h-full px-4 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all";
-            document.getElementById("filter-mp4").className = filter === "MP4" ? "h-full px-4 rounded-lg text-xs font-bold bg-primary text-white transition-all" : "h-full px-4 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all";
-            document.getElementById("filter-mp3").className = filter === "MP3" ? "h-full px-4 rounded-lg text-xs font-bold bg-primary text-white transition-all" : "h-full px-4 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all";
+            document.getElementById("filter-all").className = filter === "ALL" ? "h-full px-4 rounded-lg text-xs font-bold bg-primary text-white transition-all active:scale-95" : "h-full px-4 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all active:scale-95";
+            document.getElementById("filter-mp4").className = filter === "MP4" ? "h-full px-4 rounded-lg text-xs font-bold bg-primary text-white transition-all active:scale-95" : "h-full px-4 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all active:scale-95";
+            document.getElementById("filter-mp3").className = filter === "MP3" ? "h-full px-4 rounded-lg text-xs font-bold bg-primary text-white transition-all active:scale-95" : "h-full px-4 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all active:scale-95";
             renderHistory();
         }
 
         function renderHistory() {
             const listEl = document.getElementById("history-list");
             const emptyEl = document.getElementById("history-empty");
-            const searchVal = (document.getElementById("search-input").value || "").toLowerCase();
+            const searchInput = document.getElementById("search-input");
+            const rawSearch = (searchInput ? searchInput.value : "").trim();
+            const searchVal = rawSearch.toLocaleLowerCase(currentLang);
             const t = i18n[currentLang] || i18n.en;
 
             try {
+                if (historyData.length === 0) {
+                    listEl.innerHTML = "";
+                    emptyEl.classList.remove("hidden");
+                    emptyEl.classList.add("flex");
+                    document.getElementById("t-empty-title").innerText = t.emptyTitle;
+                    document.getElementById("t-empty-desc").innerText = t.emptyDesc;
+                    document.getElementById("t-btn-new-video").parentElement.classList.remove("hidden");
+                    return;
+                }
+
                 let filtered = historyData.filter(item => {
                     if (activeFilter !== "ALL" && item.format !== activeFilter) return false;
-                    if (searchVal && item.title && !item.title.toLowerCase().includes(searchVal)) return false;
+                    if (searchVal && item.title && !item.title.toLocaleLowerCase(currentLang).includes(searchVal)) return false;
                     return true;
                 });
 
                 if (filtered.length === 0) {
-                    listEl.innerHTML = "";
                     emptyEl.classList.remove("hidden");
                     emptyEl.classList.add("flex");
+                    document.getElementById("t-empty-title").innerText = t.searchNoResultTitle;
+                    document.getElementById("t-empty-desc").innerText = t.searchNoResultDesc;
+                    listEl.innerHTML = `
+                        <div class="flex flex-col items-center justify-center p-8 border border-border-dark rounded-2xl bg-card-dark text-center gap-3">
+                            <span class="text-slate-400 text-sm font-medium">${t.searchNoResultDesc}</span>
+                            <button onclick="clearSearch()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 active:scale-95 text-white font-bold text-xs rounded-xl border border-border-dark transition-all">
+                                ${t.btnClearSearch}
+                            </button>
+                        </div>
+                    `;
+                    emptyEl.classList.add("hidden");
+                    emptyEl.classList.remove("flex");
                     return;
                 }
 
@@ -899,6 +988,7 @@
                     const safeFormat = escapeHtml(item.format || '');
                     const safeQuality = escapeHtml(item.quality || '');
                     const safeThumb = escapeHtml(item.thumbnail || '');
+                    const exists = Boolean(item.exists);
 
                     return `
                         <div class="bg-card-dark border border-border-dark p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-slate-600 hover:shadow-lg transition-all">
@@ -911,23 +1001,23 @@
                                         <span class="bg-primary/20 text-primary border border-primary/30 text-xs font-bold px-2.5 py-0.5 rounded-md">
                                              ${safeFormat} ${safeQuality}
                                         </span>
-                                        ${!item.exists ? `<span class="bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold px-2.5 py-0.5 rounded-md">${t.fileMovedOrDeleted}</span>` : ''}
+                                        ${!exists ? `<span class="bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold px-2.5 py-0.5 rounded-md">${t.fileMovedOrDeleted}</span>` : ''}
                                     </div>
                                 </div>
                             </div>
 
                             <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                                <button onclick="openFileById('${safeId}')" title="${t.btnOpenFile}" class="p-3 rounded-xl bg-background-dark border border-border-dark text-slate-300 hover:text-emerald-400 hover:border-emerald-500/50 transition-all flex items-center justify-center">
+                                <button ${!exists ? 'disabled title="' + t.fileMovedOrDeleted + '" class="p-3 rounded-xl bg-background-dark border border-border-dark text-slate-600 opacity-40 cursor-not-allowed flex items-center justify-center"' : 'onclick="openFileById(\'' + safeId + '\')" title="' + t.btnOpenFile + '" class="p-3 rounded-xl bg-background-dark border border-border-dark text-slate-300 hover:text-emerald-400 hover:border-emerald-500/50 active:scale-95 transition-all flex items-center justify-center"'}>
                                     <svg class="size-5" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M8 5v14l11-7z"/>
                                     </svg>
                                 </button>
-                                <button onclick="openFolderById('${safeId}')" title="${t.btnOpenFolder}" class="p-3 rounded-xl bg-background-dark border border-border-dark text-slate-300 hover:text-primary hover:border-primary/50 transition-all flex items-center justify-center">
+                                <button ${!exists ? 'disabled title="' + t.fileMovedOrDeleted + '" class="p-3 rounded-xl bg-background-dark border border-border-dark text-slate-600 opacity-40 cursor-not-allowed flex items-center justify-center"' : 'onclick="openFolderById(\'' + safeId + '\')" title="' + t.btnOpenFolder + '" class="p-3 rounded-xl bg-background-dark border border-border-dark text-slate-300 hover:text-primary hover:border-primary/50 active:scale-95 transition-all flex items-center justify-center"'}>
                                     <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
                                     </svg>
                                 </button>
-                                <button onclick="promptDeleteHistory('${safeId}')" title="${t.btnDelete}" class="p-3 rounded-xl bg-background-dark border border-border-dark text-slate-300 hover:text-red-400 hover:border-red-500/50 transition-all flex items-center justify-center">
+                                <button onclick="promptDeleteHistory('${safeId}')" title="${t.btnDelete}" class="p-3 rounded-xl bg-background-dark border border-border-dark text-slate-300 hover:text-red-400 hover:border-red-500/50 active:scale-95 transition-all flex items-center justify-center">
                                     <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>
@@ -1062,6 +1152,14 @@
                 closeDeleteModal();
                 closeAboutModal();
             }
+        });
+
+        document.getElementById("delete-modal").addEventListener("click", function(e) {
+            if (e.target === this) closeDeleteModal();
+        });
+
+        document.getElementById("about-modal").addEventListener("click", function(e) {
+            if (e.target === this) closeAboutModal();
         });
 
         document.addEventListener("DOMContentLoaded", function() {

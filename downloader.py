@@ -19,6 +19,10 @@ try:
 except ImportError:
     HAS_MUTAGEN = False
 
+class DownloadCancelledException(Exception):
+    pass
+
+
 class YTDownloaderEngine:
     def __init__(self, download_dir=None):
         if not download_dir:
@@ -86,7 +90,7 @@ class YTDownloaderEngine:
             h = f.get('height')
             if h and f.get('vcodec') != 'none':
                 q_str = f"{h}p"
-                if q_str not in qualities and h in [1080, 720, 480, 360, 240, 144]:
+                if q_str not in qualities and h in [4320, 2160, 1440, 1080, 720, 480, 360, 240, 144]:
                     qualities.append(q_str)
                     
         qualities.sort(key=lambda x: int(x.replace('p', '')), reverse=True)
@@ -102,7 +106,7 @@ class YTDownloaderEngine:
             "qualities": qualities
         }
 
-    def download(self, url, format_type="MP4", quality="720p", progress_callback=None):
+    def download(self, url, format_type="MP4", quality="720p", progress_callback=None, cancel_event=None):
         """
         Downloads video/audio with given format & quality.
         Enforces H.264 video and AAC audio for 100% universal Windows Media Player compatibility.
@@ -113,6 +117,8 @@ class YTDownloaderEngine:
             raise Exception("Geçersiz YouTube bağlantısı! Lütfen doğru bir video adresi girin.")
 
         def hook(d):
+            if cancel_event and cancel_event.is_set():
+                raise DownloadCancelledException("İndirme kullanıcı tarafından iptal edildi.")
             if not progress_callback:
                 return
             if d['status'] == 'downloading':
@@ -164,6 +170,14 @@ class YTDownloaderEngine:
             'noplaylist': True,
             'windowsfilenames': True,
             'trim_file_name': 160,
+            'concurrent_fragment_downloads': 5,
+            'socket_timeout': 15,
+            'retries': 5,
+            'fragment_retries': 5,
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+                'Accept-Language': 'en-US,en;q=0.9',
+            }
         }
 
         bitrate = "192"
@@ -217,6 +231,9 @@ class YTDownloaderEngine:
                     alt_path = os.path.join(self.download_dir, base_name + expected_ext)
                     if os.path.exists(alt_path):
                         final_path = alt_path
+        except DownloadCancelledException:
+            self._cleanup_partial_files()
+            raise
         except Exception as e:
             clean_err = clean_ansi_codes(str(e))
             raise Exception(clean_err)
@@ -252,6 +269,23 @@ class YTDownloaderEngine:
         HistoryManager.add_to_history(history_item)
 
         return history_item
+
+
+    def _cleanup_partial_files(self):
+        try:
+            if not os.path.exists(self.download_dir):
+                return
+            now = time.time()
+            for fname in os.listdir(self.download_dir):
+                if fname.endswith((".part", ".ytdl")):
+                    fpath = os.path.join(self.download_dir, fname)
+                    try:
+                        if now - os.path.getmtime(fpath) < 3600:
+                            os.remove(fpath)
+                    except Exception:
+                        pass
+        except Exception:
+            pass
 
     def _embed_mp3_tags(self, mp3_file, info):
         try:

@@ -3,7 +3,7 @@
   # 🎬 YT Downloader
   ### High-Performance Standalone YouTube MP4 & MP3 Converter
 
-  [![Version](https://img.shields.io/badge/version-v2.3.0-blue.svg?style=for-the-badge)](https://github.com/brsbrkctn/yt_downloader)
+  [![Version](https://img.shields.io/badge/version-v2.4.0-blue.svg?style=for-the-badge)](https://github.com/brsbrkctn/yt_downloader)
   [![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)](LICENSE)
   [![Python](https://img.shields.io/badge/python-3.10+-yellow.svg?style=for-the-badge)](https://www.python.org/)
   [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6.svg?style=for-the-badge)](https://microsoft.com/windows)
@@ -16,12 +16,14 @@
 
 ## ✨ Features
 
-- 🎥 **1080p Full HD Video Downloads**: Merges YouTube video and audio streams seamlessly using FFmpeg for lossless 1080p, 720p, and 480p output.
+- 🎥 **4K Ultra HD & 1080p Video Downloads**: Merges YouTube video and audio streams seamlessly using FFmpeg with extended quality detection up to 4K (2160p) and 2K (1440p).
+- ⏹️ **In-Flight Download Cancellation**: Cancel long or accidental downloads at any moment with automatic cleanup of partial temporary files.
+- 🚀 **Multi-Fragment DASH Acceleration**: 5 concurrent fragment downloads with resilient socket retries and adaptive timeouts.
 - 🎵 **320 kbps Studio Quality Audio**: Embeds title, artist, and original high-res album cover art (JPEG) into MP3 ID3 metadata tags automatically.
 - 📂 **Smart Downloads Directory**: Auto-detects custom Windows Downloads folder locations (e.g. `C:\Downloads`) via Windows Registry (`User Shell Folders`).
-- ⚡ **Sub-Millisecond RAM Cache History**: In-memory caching architecture delivers 4-microsecond (0.000004s) history list rendering with zero freezing.
-- 📋 **One-Click Clipboard Paste**: Integrated native Windows C-API (`ctypes.windll.user32`) for instant, zero-delay URL pasting.
-- 🎨 **Modern Dark UI**: Sleek dark mode interface designed with PyWebView and Tailwind CSS, featuring glassmorphism and dynamic micro-animations.
+- ⚡ **Sub-Millisecond RAM Cache History**: In-memory caching architecture delivers 4-microsecond history list rendering with zero UI freezing.
+- 📋 **One-Click Clipboard Paste**: Integrated native Windows C-API (`ctypes.windll.user32`) for instant, leak-proof URL pasting.
+- 🎨 **Modern Dark UI & Tactile Micro-Interactions**: Apple HIG and Emil Kowalski inspired polish with tabular monospace digits, custom SVG selects, and fluid transitions.
 - 🗑️ **Flexible File Deletion Modal**: Option to delete entries from history only or permanently delete files from disk.
 
 ---
